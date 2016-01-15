@@ -7,10 +7,9 @@ import logging
 from scipy.interpolate import UnivariateSpline, griddata
 import pandas
 
-import DataStructures
+from utils import HelperFunctions, DataStructures
 import os
 
-import HelperFunctions
 import numpy as np
 
 
