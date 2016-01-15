@@ -16,7 +16,7 @@ from scipy.optimize import fmin
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from utils import ensure_dir
+from utils.HelperFunctions import ensure_dir
 
 
 try:
@@ -28,10 +28,6 @@ try:
 	import emcee
 except ImportError:
 	emcee = None
-try:
-	import pymultinest
-except ImportError:
-	pymultinest = None
 
 class Bayesian_LS(object):
         def __init__(self, x=1, y=1, yerr=1, param_names=None):
@@ -242,8 +238,9 @@ class Bayesian_LS(object):
                 :func:`pymultinest.run`.
             """
             
-            # Make sure pymultinest exists
-            if pymultinest is None:
+            try:
+	        import pymultinest
+            except ImportError:
             	logging.warn('You must install pymultinest (and MultiNest) to use this backend!')
             	return None
 
