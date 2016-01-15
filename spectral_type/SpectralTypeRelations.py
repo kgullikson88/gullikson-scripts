@@ -202,7 +202,7 @@ class Interpolator():
         #fileid.close()
         self.make_new_interpolator()
 
-    def make_new_interpolator(self, filename='../data/Pecaut2013.tsv'.format(os.environ['HOME'])):
+    def make_new_interpolator(self, filename='data/Pecaut2013.tsv'.format(os.environ['HOME'])):
         df = pandas.read_csv(filename, skiprows=55, sep='|', engine='python')[2:-1]
         sptnum = [self.MS.SpT_To_Number(s.strip()[:-1]) for s in df.SpT.values]
         self.sptnum_to_teff = UnivariateSpline(sptnum, df.Teff.values, s=0)
@@ -244,7 +244,7 @@ class MainSequence:
         self.AbsMag = defaultdict(float)  #Absolute Magnitude in V band
 
         # Read in the data from Pecaut & Mamajek 2013 for Teff and color indices
-        pfilename = "{:s}/Dropbox/School/Research/Databases/SpT_Relations/Pecaut2013.tsv".format(os.environ['HOME'])
+        pfilename = "data/Pecaut2013.tsv".format(os.environ['HOME'])
         # pdata = pandas.read_csv(pfilename, skiprows=55, sep="|")[2:-1]
         pdata = pandas.read_csv(pfilename, sep="|", skip_blank_lines=True, comment='#')[2:]
         pdata.apply(fill_dict, axis=1, args=(self.Temperature, 'Teff', True))

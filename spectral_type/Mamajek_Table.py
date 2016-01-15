@@ -7,7 +7,7 @@ import SpectralTypeRelations
 
 
 home = os.environ['HOME']
-TABLE_FILENAME = '../data/Mamajek_Table.txt'.format(home)
+TABLE_FILENAME = 'data/Mamajek_Table.txt'.format(home)
 
 class MamajekTable(object):
     """
