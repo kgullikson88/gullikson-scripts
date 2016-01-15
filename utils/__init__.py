@@ -1,12 +1,10 @@
-import os
+import HelperFunctions
+import HDF5_Helpers
+import IMF_utils
+import StarData
+import Units
+import plottools
+import FittingUtilities
+import DataStructures
 
 
-def ensure_dir(f):
-    """
-      Ensure that a directory exists. Create if it doesn't
-    """
-    d = os.path.dirname(f)
-    if d == "":
-        d = f
-    if not os.path.exists(d):
-        os.makedirs(d)

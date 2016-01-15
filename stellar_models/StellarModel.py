@@ -7,7 +7,7 @@ import warnings
 from collections import OrderedDict
 import itertools
 from utils import FittingUtilities, DataStructures
-from stellar_model import Broaden
+import Broaden
 import logging
 from astropy import units
 

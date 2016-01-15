@@ -10,7 +10,7 @@ import numpy as np
 
 import Correlate
 from utils import HelperFunctions
-from stellar_model import StellarModel
+from stellar_models import StellarModel, Broaden
 
 
 try:
@@ -24,7 +24,6 @@ import subprocess
 from collections import defaultdict
 from utils import StarData
 from spectral_type import SpectralTypeRelations
-from stellar_model import Broaden
 from astropy import units as u
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 import re

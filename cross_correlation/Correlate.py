@@ -4,7 +4,7 @@ import warnings
 import logging
 from astropy import units, constants
 from utils import FittingUtilities, DataStructures, HelperFunctions
-from stellar_model.Broaden import RotBroad
+from stellar_models.Broaden import RotBroad
 
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.optimize import minimize, minimize_scalar
