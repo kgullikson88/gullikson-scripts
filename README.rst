@@ -7,5 +7,9 @@ Installation
 ============
 
 If you use anaconda python, use:
-conda install h5py pandas scipy matplotlib bokeh==0.10 astropy scikit-learn cython seaborn
-python setup.py install
+
+.. code:: bash
+
+    conda install h5py pandas scipy matplotlib bokeh==0.10 astropy scikit-learn cython seaborn
+    python setup.py install
+    
