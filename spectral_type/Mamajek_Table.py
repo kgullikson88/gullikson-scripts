@@ -5,9 +5,12 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
 import SpectralTypeRelations
 
+_ROOT = os.path.abspath(os.path.dirname(__file__))
+def get_data(path):
+    return os.path.join(_ROOT, 'data', path)
 
 home = os.environ['HOME']
-TABLE_FILENAME = 'data/Mamajek_Table.txt'.format(home)
+TABLE_FILENAME = os.path.join(get_data('Mamajek_Table.txt'))
 
 class MamajekTable(object):
     """
