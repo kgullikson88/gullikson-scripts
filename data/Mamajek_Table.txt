@@ -1,0 +1,527 @@
+# "A Modern Mean Stellar Color and Effective Temperature Sequence for O9V-Y0V Dwarf Stars"
+# http://www.pas.rochester.edu/~emamajek/EEM_dwarf_UBVIJHK_colors_Teff.txt
+# Eric Mamajek (University of Rochester) 
+# Version 2014.09.29
+#
+# Much of the content (but not all) of this table was incorporated
+# into Table 5 of Pecaut & Mamajek (2013, ApJS, 208, 9;
+# http://adsabs.harvard.edu/abs/2013ApJS..208....9P), so that
+# reference should be cited. Parts of this table for A/F/G stars also
+# appeared in Table 3 of Pecaut, Mamajek, & Bubar (2012, ApJ 756,
+# 154).  For example, Table 5 of Pecaut & Mamajek did not include the
+# absolute magnitude and luminosity estimates, nor the properties of
+# the LTY dwarfs.
+#
+# The author's notes on standard stars and the mean properties for
+# stars for each dwarf spectral type can be found in the directory at:
+# http://www.pas.rochester.edu/~emamajek/spt/. See further notes and
+# caveats after the table. Colors are based on Johnson UBV, 
+# Tycho BtVt, Cousins RcIc, 2MASS JHKs, and WISE W1 photometry.
+#
+SpT    Teff   logT   BCv     Mv    logL  B-V   Bt-Vt    U-B     V-Rc   V-Ic    V-Ks    J-H     H-K     Ks-W1  Msun  logAge b-y    #SpT    M_J    M_K    Mbol 
+O9V    34000  4.531  -3.20  -4.00  4.77 -0.318 ...     -1.114   ...   -0.369  -1.000  -0.164  -0.071   ...    19.6  6.6*  -0.128  O9V    -3.44  -3.20  -7.20 
+O9.5V  32000  4.505  -3.06  -3.90  4.67 -0.312 ...     -1.087   ...   -0.361  -0.977  -0.161  -0.069   ...    18    6.7*  -0.125  O9.5V  -3.25  -3.02  -6.96 
+B0V    31500  4.498  -3.03  -3.80  4.65 -0.307 ...     -1.067   ...   -0.355  -0.958  -0.159  -0.067   ...    17.7  6.8*  -0.121  B0V    -3.17  -2.94  -6.83 
+B0.5V  29000  4.462  -2.87  -3.60  4.47 -0.295 ...     -1.026   ...   -0.338  -0.913  -0.153  -0.063   ...    13.8  6.9*  -0.120  B0.5V  -3.01  -2.79  -6.47 
+B1V    26000  4.415  -2.61  -3.00  4.13 -0.278 ...     -0.995  -0.115 -0.325  -0.874  -0.148  -0.059   ...    11.0  7.0*  -0.114  B1V    -2.14  -1.93  -5.41 
+B1.5V  24800  4.394  -2.43  -2.60  3.89 -0.252 -0.274  -0.910  -0.114 -0.281  -0.752  -0.132  -0.047   0.035  9.6   7.1*  -0.105  B1.5V  -2.03  -1.85  -5.03 
+B2V    20600  4.314  -2.06  -1.70  3.38 -0.210 -0.219  -0.790  -0.094 -0.230  -0.602  -0.113  -0.032   0.036  7.4   7.2*  -0.096  B2V    -1.25  -1.10  -3.75 
+B2.5V  18500  4.267  -1.79  -1.40  3.10 -0.198 -0.206  -0.732  -0.087 -0.210  -0.544  -0.105  -0.026   0.036  6.1   7.3*  -0.090  B2.5V  -0.88  -0.75  -3.19 
+B3V    17000  4.230  -1.58  -1.10  2.96 -0.178 -0.184  -0.673  -0.080 -0.192  -0.492  -0.098  -0.021   0.036  5.4   7.4*  -0.085  B3V    -0.73  -0.61  -2.78 
+B4V    16700  4.223  -1.53  -0.80  2.81 -0.165 -0.170  -0.619  -0.074 -0.176  -0.447  -0.092  -0.016   0.036  5.0   7.5*  -0.081  B4V    -0.46  -0.35  -2.33 
+B5V    15700  4.196  -1.37  -0.70  2.71 -0.156 -0.160  -0.581  -0.070 -0.165  -0.417  -0.089  -0.013   0.036  4.6   7.7*  -0.075  B5V    -0.38  -0.28  -2.07 
+B6V    14500  4.161  -1.16  -0.50  2.54 -0.140 -0.142  -0.504  -0.062 -0.145  -0.358  -0.081  -0.007   0.035  4.0   7.8*  -0.068  B6V    -0.23  -0.14  -1.66 
+B7V    14000  4.146  -1.07  -0.40  2.47 -0.128 -0.129  -0.459  -0.058 -0.133  -0.325  -0.077  -0.004   0.035  3.9   7.9*  -0.061  B7V    -0.15  -0.07  -1.47 
+B8V    12500  4.097  -0.79  -0.20  2.24 -0.109 -0.107  -0.364  -0.048 -0.108  -0.254  -0.067   0.003   0.034  3.4   8.1*  -0.049  B8V     0.10   0.16  -0.99 
+B9V    10700  4.029  -0.44   0.50  1.86 -0.070 -0.063  -0.200  -0.028 -0.061  -0.121  -0.050   0.016   0.032  2.8   8.3*  -0.035  B9V     0.59   0.62   0.06 
+B9.5V  10400  4.017  -0.38   0.80  1.71 -0.050 -0.040  -0.130  -0.017 -0.035  -0.048  -0.044   0.021   0.031  2.5   8.4*  -0.026  B9.5V   0.83   0.85   0.42 
+A0V    9700   3.987  -0.24   1.11  1.54  0.000  0.013  -0.005   0.001  0.004   0.041  -0.032   0.028   0.030  2.3   8.5    0.000  A0V     1.07   1.07   0.87 
+A1V    9200   3.965  -0.15   1.34  1.41  0.043  0.056   0.033   0.019  0.044   0.101  -0.024   0.031   0.030  2.2   8.6    0.017  A1V     1.25   1.24   1.19 
+A2V    8840   3.946  -0.10   1.48  1.33  0.074  0.091   0.063   0.042  0.091   0.188  -0.010   0.034   0.029  2.1   8.7    0.038  A2V     1.32   1.29   1.38 
+A3V    8550   3.932  -0.06   1.55  1.29  0.090  0.109   0.077   0.050  0.108   0.228  -0.002   0.034   0.029  2.00  8.7    0.055  A3V     1.35   1.32   1.49 
+A4V    8270   3.917  -0.04   1.76  1.20  0.140  0.166   0.097   0.078  0.164   0.353   0.022   0.037   0.029  1.91  8.8    0.071  A4V     1.47   1.41   1.72 
+A5V    8080   3.907  -0.03   1.84  1.16  0.160  0.185   0.100   0.089  0.186   0.403   0.031   0.038   0.029  1.90  8.8    0.090  A5V     1.51   1.44   1.81 
+A6V    8000   3.903  -0.02   1.89  1.14  0.170  0.194   0.098   0.094  0.197   0.428   0.036   0.038   0.029  1.83  8.9    0.099  A6V     1.54   1.46   1.87 
+A7V    7800   3.892   0.00   2.07  1.06  0.210  0.233   0.091   0.117  0.242   0.528   0.055   0.040   0.029  1.76  8.9    0.107  A7V     1.64   1.54   2.07 
+A8V    7500   3.874   0.00   2.29  0.97  0.250  0.274   0.082   0.140  0.288   0.626   0.075   0.042   0.028  1.67  9.0    0.132  A8V     1.78   1.66   2.29 
+A9V    7440   3.872   0.00   2.30  0.97  0.255  0.279   0.080   0.143  0.294   0.638   0.078   0.043   0.028  1.66  9.0    0.145  A9V     1.78   1.66   2.30 
+F0V    7200   3.857  -0.01   2.51  0.89  0.294  0.317   0.053   0.166  0.339   0.732   0.098   0.045   0.028  1.58  9.1    0.158  F0V     1.90   1.76   2.50 
+F1V    7030   3.847  -0.01   2.79  0.77  0.334  0.350   0.021   0.190  0.385   0.828   0.119   0.047   0.028  1.50  9.1    0.204  F1V     2.13   1.96   2.78 
+F2V    6810   3.833  -0.02   2.99  0.70  0.374  0.390  -0.008   0.213  0.432   0.925   0.140   0.050   0.028  1.44  9.2    0.250  F2V     2.26   2.07   3.97 
+F3V    6720   3.827  -0.03   3.08  0.67  0.389  0.405  -0.016   0.222  0.449   0.961   0.147   0.051   0.028  1.43  9.2    0.263  F3V     2.32   2.12   3.05 
+F4V    6640   3.822  -0.04   3.23  0.61  0.412  0.428  -0.026   0.236  0.476   1.017   0.159   0.052   0.028  1.37  9.2    0.277  F4V     2.42   2.21   3.19 
+F5V    6510   3.814  -0.04   3.40  0.54  0.438  0.455  -0.029   0.252  0.506   1.079   0.173   0.054   0.028  1.32  9.3    0.290  F5V     2.55   2.32   3.36 
+F6V    6340   3.802  -0.05   3.70  0.43  0.484  0.504  -0.021   0.276  0.553   1.185   0.199   0.057   0.028  1.25  9.4    0.317  F6V     2.78   2.52   3.65 
+F7V    6240   3.795  -0.06   3.87  0.36  0.510  0.534  -0.012   0.290  0.579   1.244   0.213   0.060   0.027  1.21  9.5    0.332  F7V     2.90   2.63   3.81 
+F8V    6150   3.789  -0.07   4.01  0.31  0.530  0.558   0.001   0.300  0.599   1.290   0.225   0.061   0.027  1.18  9.6    0.350  F8V     3.01   2.72   3.94 
+F9V    6040   3.781  -0.08   4.15  0.26  0.552  0.587   0.014   0.312  0.620   1.340   0.237   0.063   0.027  1.14  9.7    0.378  F9V     3.11   2.81   4.07 
+G0V    5920   3.772  -0.09   4.39  0.17  0.588  0.638   0.049   0.331  0.656   1.421   0.258   0.066   0.027  1.09  9.7    ...    G0V     3.29   2.97   4.30 
+G1V    5880   3.769  -0.10   4.50  0.13  0.604  0.661   0.067   0.340  0.672   1.458   0.267   0.068   0.027  1.07  9.8    ...    G1V     3.38   3.04   4.40 
+G2V    5770   3.761  -0.11   4.79  0.01  0.650  0.724   0.133   0.363  0.713   1.564   0.293   0.073   0.028  1.00  9.8    ...    G2V     3.57   3.20   4.68 
+G3V    5720   3.757  -0.12   4.86 -0.01  0.661  0.739   0.152   0.368  0.722   1.590   0.299   0.074   0.028  1.00  ...    ...    G3V     3.64   3.27   4.74 
+G4V    5680   3.754  -0.13   4.94 -0.04  0.674  0.757   0.175   0.374  0.733   1.621   0.307   0.075   0.028  0.99  ...    ...    G4V     3.70   3.32   4.80 
+G5V    5660   3.753  -0.13   4.98 -0.05  0.680  0.764   0.185   0.377  0.738   1.635   0.310   0.076   0.028  0.98  ...    ...    G5V     3.74   3.35   4.84 
+G6V    5590   3.747  -0.15   5.13 -0.11  0.704  0.796   0.227   0.388  0.758   1.691   0.324   0.079   0.028  0.97  ...    ...    G6V     3.84   3.44   4.98 
+G7V    5530   3.743  -0.16   5.18 -0.12  0.713  0.809   0.243   0.393  0.766   1.712   0.329   0.080   0.028  0.96  ...    ...    G7V     3.88   3.47   5.02 
+G8V    5490   3.734  -0.17   5.32 -0.17  0.737  0.842   0.284   0.404  0.786   1.768   0.342   0.082   0.028  0.94  ...    ...    G8V     3.97   3.55   5.15 
+G9V    5340   3.728  -0.21   5.55 -0.25  0.777  0.894   0.358   0.423  0.820   1.861   0.365   0.087   0.029  0.91  ...    ...    G9V     4.14   3.69   5.34 
+K0V    5280   3.723  -0.22   5.76 -0.33  0.816  0.944   0.436   0.443  0.853   1.953   0.387   0.091   0.030  0.89  ...    ...    K0V     4.29   3.81   5.54 
+K1V    5170   3.713  -0.26   5.91 -0.37  0.847  0.982   0.502   0.460  0.883   2.034   0.405   0.094   0.030  0.86  ...    ...    K1V     4.47   3.97   5.65 
+K2V    5040   3.706  -0.29   6.19 -0.47  0.893  1.047   0.600   0.487  0.929   2.155   0.432   0.099   0.031  0.85  ...    ...    K2V     4.57   4.04   5.88 
+K3V    4840   3.685  -0.41   6.57 -0.58  0.990  1.166   0.801   0.544  1.025   2.410   0.490   0.110   0.034  0.81  ...    ...    K3V     4.76   4.16   6.16 
+K4V    4620   3.665  -0.55   7.04 -0.71  1.100  1.306   1.004   0.640  1.190   2.733   0.544   0.125   0.039  0.78  ...    ...    K4V     4.98   4.31   6.48 
+K5V    4450   3.648  -0.67   7.25 -0.75  1.134  1.352   1.056   0.671  1.246   2.835   0.560   0.130   0.041  0.75  ...    ...    K5V     5.11   4.42   6.58 
+K6V    4200   3.623  -0.86   7.88 -0.92  1.257  1.454   1.199   0.771  1.448   3.190   0.605   0.151   0.051  0.70  ...    ...    K6V     5.45   4.69   7.07 
+K7V    4050   3.607  -1.00   8.30 -1.04  1.336  1.538   1.222   0.824  1.574   3.407   0.623   0.168   0.061  0.64  ...    ...    K7V     5.68   4.89   7.30 
+K8V    3970   3.599  -1.11   8.60 -1.12  1.382  1.592   1.213   0.859  1.671   3.554   0.630   0.181   0.069  0.62  ...    ...    K8V     5.86   5.05   7.52 
+K9V    3880   3.589  -1.25   8.96 -1.22  1.418  1.634   1.198   0.900  1.802   3.728   0.624   0.197   0.081  0.60  ...    ...    K9V     6.05   5.23   7.77 
+M0V    3850   3.585  -1.30   9.16 -1.26  1.431  1.650   1.190   0.913  1.848   3.790   0.622   0.203   0.086  0.58  ...    ...    M0V     6.14   5.37   7.90 
+M1V    3680   3.566  -1.53   9.80 -1.42  1.484  ...     1.171   0.974  2.074   4.100   0.608   0.227   0.104  0.52  ...    ...    M1V     6.54   5.70   8.27 
+M2V    3550   3.550  -1.65  10.30 -1.57  1.500  ...     1.170   1.001  2.173   4.240   0.600   0.234   0.110  0.5   ...    ...    M2V     6.89   6.06   8.65 
+M3V    3400   3.531  -1.97  11.14 -1.78  1.544  ...     1.181   1.079  2.420   4.600   0.579   0.252   0.122  0.4   ...    ...    M3V     7.40   6.54   9.17 
+M4V    3200   3.505  -2.59  12.80 -2.20  1.661  ...     1.215   1.241  2.831   5.250   0.557   0.282   0.139  0.24  ...    ...    M4V     8.39   7.55  10.21 
+M5V    3050   3.484  -3.28  14.30 -2.52  1.874  ...     1.433   1.446  3.277   5.942   0.580   0.311   ...    0.15  ...    ...    M5V     9.25   8.36  11.02 
+M6V    2800   3.447  -4.36  16.62 -3.02  2.000  ...     ...     1.950  4.100   7.300   0.605   0.352   ...    0.10  ...    ...    M6V    10.28   9.32  12.26 
+M7V    2650   3.423  -5.06  17.81 -3.21  2.060  ...     ...     2.180  4.520   8.050   0.613   0.386   ...    0.098 ...    ...    M7V    10.76   9.76  12.75 
+M8V    2570   3.410  -5.66  18.75 -3.35  2.130  ...     ...     2.150  4.600   8.700   0.675   0.446   ...    0.082 ...    ...    M8V    11.16  10.04  13.09 
+M9V    2450   3.389  -5.73  19.26 -3.53  ...    ...     ...     1.890  4.370   8.850   0.749   0.481   ...    0.065 ...    ...    M9V    11.64  10.41  13.53 
+L0V    2250   3.352  ...    19.8   ...   ...    ...     ...     ...    4.6     9.3     0.79    0.50    ...    ...   ...    ...    L0V    11.67  10.38  ...   
+L1V    2200   3.342  ...    20.3   ...   ...    ...     ...     ...    4.8     9.6     0.80    0.54    ...    ...   ...    ...    L1V    12.37  11.03  ...   
+L2V    2190   3.340  ...    20.8   ...   ...    ...     ...     ...    4.9     9.9     0.87    0.57    ...    ...   ...    ...    L2V    12.61  11.17  ...   
+L3V    1920   3.283  ...    21.3   ...   ...    ...     ...     ...    5.0     10.2    1.00    0.63    ...    ...   ...    ...    L3V    12.82  11.22  ...   
+L4V    1810   3.258  ...    22.2   ...   ...    ...     ...     ...    5.5     10.8    1.14    0.63    ...    ...   ...    ...    L4V    13.14  11.47  ...   
+L5V    1750   3.243  ...    23.1   ...   ...    ...     ...     ...    6.0     11.4    1.13    0.65    ...    ...   ...    ...    L5V    13.55  11.82  ...   
+L6V    1670   3.223  ...    ...    ...   ...    ...     ...     ...    ...     ...     1.08    0.64    ...    ...   ...    ...    L6V    13.95  12.27  ...   
+L7V    1590   3.201  ...    ...    ...   ...    ...     ...     ...    ...     ...     1.10    0.62    ...    ...   ...    ...    L7V    14.26  12.62  ...   
+L8V    1430   3.155  ...    ...    ...   ...    ...     ...     ...    ...     ...     1.14    0.63    ...    ...   ...    ...    L8V    14.43  12.70  ...   
+L9V    1400   3.146  ...    ...    ...   ...    ...     ...     ...    ...     ...     1.10    0.63    ...    ...   ...    ...    L9V    14.44  12.74  ...   
+T0V    1370   3.137  ...    ...    ...   ...    ...     ...     ...    ...     ...     1.02    0.54    ...    ...   ...    ...    T0V    14.34  12.90  ...   
+T1V    1325   3.122  ...    ...    ...   ...    ...     ...     ...    ...     ...     1.02    0.45    ...    ...   ...    ...    T1V    14.21  12.87  ...   
+T2V    1280   3.107  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.86    0.27    ...    ...   ...    ...    T2V    14.12  13.19  ...   
+T3V    1240   3.093  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.68    0.08    ...    ...   ...    ...    T3V    14.14  13.69  ...   
+T4V    1205   3.081  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.35   -0.19    ...    ...   ...    ...    T4V    14.32  14.51  ...   
+T4.5V  1185   3.073  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.2    -0.06    ...    ...   ...    ...    T4.5V  14.48  14.66  ...   
+T5V    1160   3.064  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.2    -0.08    ...    ...   ...    ...    T5V    14.68  14.90  ...   
+T5.5V  1055   3.023  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.2    -0.10    ...    ...   ...    ...    T5.5V  14.92  15.18  ...   
+T6V    970    2.987  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.1    -0.03    ...    ...   ...    ...    T6V    15.20  15.54  ...   
+T7V    950    2.978  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.0     0.00    ...    ...   ...    ...    T7V    15.91  16.36  ...   
+T7.5V  815    2.911  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.2    -0.05    ...    ...   ...    ...    T7.5V  16.36  16.85  ...   
+T8V    730    2.863  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.2    -0.05    ...    ...   ...    ...    T8V    16.89  17.43  ...   
+T8.5V  630    2.799  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.2     ...     ...    ...   ...    ...    T8.5V  17.55  ...    ...   
+T9V    555    2.744  ...    ...    ...   ...    ...     ...     ...    ...     ...     0.1    -0.20    ...    ...   ...    ...    T9V    18.40  18.48  ...   
+T9.5V  500    2.699  ...    ...    ...   ...    ...     ...     ...    ...     ...     ...     ...     ...    ...   ...    ...    T9.5V  19.52  19.32  ...   
+Y0V    400    2.602  ...    ...    ...   ...    ...     ...     ...    ...     ...     ...     ...     ...    ...   ...    ...    Y0V    24     ...    ...   
+#SpT   Teff   logT   BCv    Mv     logL  B-V   Bt-Vt    U-B     V-Rc   V-Ic    V-Ks    J-H     H-K     Ks-W1  Msun  lgAge  b-y    #SpT   M_J    M_Ks   Mbol  
+
+The adopted mean masses and log(age/yr)s for a given dwarf subtype are
+tentative.  With only a few minor exceptions (mainly for b-y colors;
+see notes below), this is *not* a compilation of values adopted from
+similar tables published by other authors. The author's motivation was
+to construct a "modern" table of mean stellar parameters based on an
+*independent* survey of the literature and catalog values. In the
+process, I've made judgements on which stars and stellar
+classifications reflect the "modern" MK system.  You can get a sense
+of the messiness and care that went into this process by perusing the
+spectral type note files in the previously mentioned directory. This
+is an independently constructed compendium, and the author will make
+small adjustments, corrections, and add content periodically.  Values
+in the table marked by a asterisk (*) are very preliminary, and
+probably shouldn't be used for any serious calculations yet. -EEM
+
+Further notes by spectral class, followed by summaries of updates. 
+
+OB stars: 
+
+A major redux of the Q-method of dereddening in Oct 2011 results in
+some shifts to the color scale among the late-O/early-B stars.  There
+are no O-B2 stars within the Local Bubble (at least out to 75 pc; this
+is a long standing problem with empirical color calibrations,
+e.g. Johnson & Morgan 1953), so one must attempt some bootstrap some
+dereddening in order to empirically derive the intrinsic color
+sequence. To augment the samples of negligibly reddened stars within
+75 pc, I have taken a sample of stars which have measured neutral
+hydrogen (H I) column densities, as measured through modeling of Lyman
+alpha absorption in UV spectra (e.g. Bohlin et al. 1983), then
+estimated E(B-V) from adoption of the E(B-V)/N_HI relation from Savage
+& Mathis (1979; N(HI)/E(B-V) = 4.8e21 atoms/cm^2/mag). While there may
+be intrinsic scatter in the N(HI)/E(B-V) relation through the ISM, we
+consider this a useful statistical dereddening technique for getting
+at the intrinsic color sequence of hot dwarf stars. While the
+E(B-V)/N_HI relation is calibrated using E(B-V)s for hot stars that
+rely on an intrinsic SpT vs. color sequence (and hence one could
+object that there is some circularity in our calibration scheme), the
+*slope* of the relation mostly rely on the HI column densities for hot
+stars with relatively large reddenings - hence any zero-point issues
+in the color sequence at the <few hundredths of a magnitude level in
+the determination of the N(HI)/E(B-V) slope will be negligible, and
+will have negligible impact on our "dereddenings" (using N_HI) of our
+lightly reddened OB stars.
+
+To piece together the intrinsic Q vs. (B-V)o vs. (U-B)o sequence, we
+combine 3 samples: 
+
+(1) Stars from the Hipparcos catalog with S/N > 8 parallaxes that
+place the stars within 75 pc, and have "A0V" classifications, and
+which have both B-V and U-B photometry in Mermilliod(1991). These will
+define the curve in the B-V vs. U-B sequence near zero colors.
+
+(2) Stars with B class and V luminosity class in the Hipparcos catalog
+with S/N > 8 parallaxes that place the stars within 75 pc, and which
+have both B-V and U-B photometry in Mermilliod(1991). These mostly
+define the approximately linear color sequence between ~B3V and ~B9V. 
+
+(3) A subsample of O/early-B spectral standard dwarf and/or subgiant
+stars (V or IV luminosity classifications, preferentially within a few
+hundred pc) with UBV photometry in the Mermilliod Johnson photometry
+compendium, *and* an estimate of the neutral hydrogen column
+density. All of the notes on the dereddening of these hot stars and
+adopted input parameters are listed in the files (sorted by MK
+subtype) in the directory at:
+http://www.pas.rochester.edu/~emamajek/spt/.
+
+If one adopts the Q parameter formula:
+
+Q = (U-B) - 0.72*(B-V)
+
+We have confirmed the Johnson reddening slope - we independently
+estimate an average reddening slopes of E(U-B)/E(B-V) = 0.732+-0.010
+for the ensemble of all Hipparcos O8-B9 dwarfs with UBV photometry in
+the Mermilliod compendium of Johnson photometry. We retain a slope of
+0.72 for continuity with published estimates of the "Q" parameter.
+
+The final fits for OB stars (i.e. (U-B)o < 0) are:
+
+(B-V)o = -4.776008156728d-03 + 5.522012574154d-01*Q +
+1.151583004497d+00*Q^2 + 1.829921229667d+00*Q^3 +
+8.933113140506d-01*Q^4 [-0.32 < (B-V)o < 0.02]
+
+(U-B)o = 6.230566666312d-03 + 1.533217755592d+00*Q +
+1.385407188924d+00*Q^2 + 2.167355580182d+00*Q^3 +
+1.075207514655d+00*Q^4 [-1.13 < (U-B)o < 0.02]
+
+(U-B)o = -1.368272076317e-02 + 1.590637348534e+00*(B-V) -
+1.477363936224e+01*(B-V)^2 + 5.039982446611e+01*(B-V)^3 +
+5.472117191781e+02*(B-V)^4 + 9.445941583982e+02*(B-V)^5
+[rms = 0.042 mag; -0.32 < (B-V)o < 0.02]
+
+(B-V)o = 8.440163260524e-03 + 5.780296047218e-01*(U-B) +
+1.322981897905e+00*(U-B)^2 + 2.141912996160e+00*(U-B)^3 +
+1.531076773342e+00*(U-B)^4 + 4.212960258861e-01*(U-B)^5
+[rms = 0.016 mag; -1.13 < (U-B)o < 0.02] 
+
+The extinction at V-band was then calculates using the relation
+listed in Olson (1975): 
+
+A_V(Johnson) = 3.25*E(B-V) + 0.25*(B-V)o*E(B-V) + 0.05*E(B-V)^2)
+
+Our revised Q-method relations were used to deredden the OB stars.
+The calculated E(B-V) values were then used to deredden
+the VIJHK photometry so that we could determine the intrinsic color
+sequence for the hot stars.
+
+From the reddening parameters in the Asiago photometric database, we
+adopted the following reddening relations for our OB stars:
+
+A_I(Cousins) = E(B-V)*(1.805 + 0.024*E(B-V))
+A_J(2MASS)   = E(B-V)*(0.832 + 0.013*E(B-V))
+A_H(2MASS)   = E(B-V)*(0.527 + 0.009*E(B-V))
+A_Ks(2MASS)  = E(B-V)*(0.356 + 0.006*E(B-V)) 
+
+For typical late-O/early-B type stars with (B-V) ~ -0.3, and small
+extinctions (like the stars used for our calibrations), these
+relations translate to familiar ratios of total-to-selective
+extinction of:
+
+A_I/A_V  ~ 0.57 
+A_J/A_V  ~ 0.26
+A_H/A_V  ~ 0.17
+A_Ks/A_V ~ 0.11 
+
+We then deredden the combined UBVIJHKs photometry using these
+relations (and the updated Q-method calibration to calculate E(B-V)),
+and fit color sequences to the OB stars for those stars that had
+reddenings of E(B-V) < 0.3. This was only done for stars that had a
+Hipparcos multiplicity flag of Ncomp=1, 2MASS photometry quality flags
+of "AAA" for the JHKs photometry (i.e. the highest reliability level
+for all 3 near-IR bands), and V-I colors in Hipparcos (which are a mix
+of published Cousins V-I colors and values carefully interpolated
+using other published color information, see the ESA 1997 Hipparcos &
+Tycho volume).
+
+There are very few stars with (V-Ks) < -0.8 that satisfied all of our
+criteria, so their intrinsic colors are an extrapolation of these
+color relations (and the few points available seem to support the
+extrapolation, within the photometric uncertainties).
+
+M Dwarfs:
+
+I *highly* recommend that you use the colors in this table, and
+spectral standards recommended in the files in the directory:
+http://www.pas.rochester.edu/~emamajek/spt/. The M standards have
+changes significantly since the 1950s-1970s, and the 1990s era
+standards used by Kirkpatrick, Henry, and collaborators have been
+heavily used over the past two decades. So older compilations of
+colors/Teffs from the 1980s and early 1990s are likely to be out of
+date primarily due to shifts in the use of accepted standard stars.
+Indeed the "dancing" of choice of the standard stars among the M
+subtypes was one of the motivations for putting together this table.
+
+L/T/Y Dwarfs: 
+
+The Teffs for L/T dwarfs are drawn from the author's compiled list of
+published Teffs for such objects (each type listed had at least 5
+published Teff estimates for representative members of that
+temperature subclass). I do not yet have note files by each spectral
+subtype yet for the L/T/Y dwarfs.
+
+# UPDATES (I'm obviously calling the version #s by year.month.day)
+
+2011.5.11: updated B9.5V-A2V colors very slightly - fixed a minor,
+previously unaccounted for discontinuity in V-K vs. B-V sequence,
+which had minor <0.01 magnitude effects on other colors.
+
+2011.6.21: fixed typo V-I(F4V) = 0.412 => 0.476 (thanks Rahul Patel,
+Stony Brook). Slightly adjusted colors for G2V stars based on updated
+discussion on solar color in: http://www.pas.rochester.edu/~emamajek/sun.txt .
+
+2011.6.26: I've added what I consider to be good consensus values for
+V-band bolometric correction (BCv), absolute V magnitude (Mv) and
+bolometric luminosities (logL, normalized to Sun) for spectral types
+A0V through M7V. The values are discussed in the individual spectral
+type files at: http://www.pas.rochester.edu/~emamajek/spt/ .
+
+2011.6.28: updated Mv, logL for K/M stars by incorporating the
+sequence of V-Ks vs. Mv by fitting Neill Reid's photometry for CNS3
+(nearby) stars. The fit is (for 2.0 < V-K < 9.1): Mv =
+1.018502543505d+01 - 9.263270647616d+00*(V-Ks) +
+6.602690052816d+00*(V-Ks)^2 - 2.147548532548d+00*(V-Ks)^3 +
+3.874832372602d-01*(V-Ks)^4 - 3.536870767807d-02*(V-Ks)^5 +
+1.260298536591d-03*(V-Ks)^6, with the rms = 0.46 mag in Mv.  This
+compares fairly well to the V-Ks vs. Mv sequence of Johnson & Apps
+(2009). Most of the new Mv values for a given spectral type are
+averages of the Mv vs. V-Ks sequence (for an adopted V-Ks) based on
+the Johnson & Apps (2009) and custom fit to Reid's photometry
+compendium for CNS3 stars. Also made minor shifts to the colors for
+M7V (adopting V-Ks=7.30 instead of 7.23).
+
+2011.8.17: I've added a preliminary 2MASS Ks minus WISE W1 color (Ks -
+W1) sequence based on the colors of thousands of nearby unreddened
+BAFGKM stars. I found an intrinsic color sequence for (Ks-W1) between
+-0.05 < (H-Ks) < 0.30 of (Ks-W1) = 3.401881177741d-02 -
+1.331277406699e-01*(H-Ks) - 9.041089929636e-01*(H-Ks)^2 +
+2.500587445557e+01*(H-Ks)^3 - 5.485829130472e+01*(H-Ks)^4. One can
+safely adopt an intrinsic color (Ks-W1) = 0.03 across the AFG dwarf
+spectral classes.
+
+2011.8.22: added log10(Teff) and uncertainties (assuming one integer
+subtype; i.e. uncertainty in Teff for B5V is simply approximated as
+[Teff(B4V)-Teff(B6V)]/2). Added line for O9V and O9.5V. Recheck of BCv
+scale of OB stars taking into account Lanz & Hubeny (2003, 2007)
+resulted in minute changes to BCv and logL scale. [I have since
+removed Teff uncertainties for now]
+
+2011.8.23: added preliminary Teffs for T9V, T9.5V, and Y0V based on
+Cushing et al. 2011 (http://arxiv.org/abs/1108.4678).
+
+2011.8.24: added (b-y) colors for A stars from Crawford 1979. (b-y)
+for A0V-A2V from Gray & Garrison 1987, values adopted for 100 < vsini
+< 200 km/s bin. (b-y) colors for O9V-B9.5V stars are from Warren
+(1976; MNRAS, 174, 111). (b-y) colors for F2V, F5V-F9V from Crawford
+1975 (AJ, 80, 955), with F1V, F3V, F4V colors interpolated.
+
+2011.9.17: minor changes to Teff for F0V and F1V, and minor shift in
+colors for F1V.
+
+2011.10.4: Bolometric corrections have been edited slightly. The
+current values were calculated using the median value calculated for
+the adopted Teff from multiple published calibrations, including Lanz
+& Hubeny (2003), Code et al. (1976), Balona et al. (1994), Bessell et
+al. (1998), Bertone et al. (2004), Flower et al. (1996), Masana et
+al. (2006), and Casagrande et al. (2008). While this median value may
+not represent the latest, greatest estimate, it does benefit from
+representing a concensus of literature calibrations (some of which are
+dependent on the same model atmospheres, e.g. Kurucz), and is
+relatively insensitive to outlier calibrations. I have added the
+column "uBCv" which is a naive estimate of the *systematic*
+uncertainty in the BCv(Teff) scale, calculated using the standard
+deviation of the BCv values calculated using the various BCv
+calibrations as a function of Teff. The meaning of uBCv should not be
+taken too literally (more detailed models in the future could
+concievably shift the BCv scale at the high and low Teff ends?), but
+it is a reasonable estimate of the scatter in the BCv scale given the
+published literature. For the M stars, I explicitly omitted Flower
+(1996) in the calculations as its BCv(Teff) values were seriously at
+odds with the Casagrande et al. (2008) BCv scale. The Flower (1996)
+calibration relies heavily on giants, and the Casagrande et
+al. calibration draws from modern stellar atmosphere models for cool
+stars and a large body of optical/near-IR photometry for dwarf
+stars. For example, for Teff = 3300 K, Flower (1996) predicts BCv =
+-3.12 mag, while Casagrande et al. (2008) predicts BCv = -1.86
+mag. For cooler stars, the Flower (1996) curve should probably be
+avoided. Use of erroneous bolometric corrections for M dwarfs could
+systematically, and drastically, affect the inferred luminosities (and
+hence ages and masses) of pre-MS M stars.
+
+2011.10.8: updated intrinsic (B-V) and (U-B) colors for O9V and O9.5V
+stars using updated Q-method calculations in the spectral type files.
+I largely recover a color sequence close to the original Johnson
+publications.
+
+2011.10.9: updated and screened (B-V), (U-B), Mv, logL, BCv values for
+O9V-B3V stars. These take into account the updated Q-method
+calibration and some new estimates of Mv among the standard stars, and
+the observed main sequence for the Orion Nebula Cluster (ONC) and
+Upper Sco (US). Added lines for B1.5V and B2.5V subtypes (b-y colors
+are simply interpolated halfway between the integer subtypes).
+
+2011.10.28: used the revised Q-method to deredden Hipparcos OB stars,
+and then with the derived Av values, dereddened UBVIJHK magnitudes and
+calculated recalculated colors for O9V-B9.5V stars.
+
+2011.11.1: Rewrote discussion on deriving the intrinsic color sequence
+of hot OB stars using the Q-method and dereddening of lightly reddened
+stars. I've added a column of predicted masses and ages ("lgAge" =
+log10(age/yr)) for the mean HR diagram positions using adopted
+"protosolar" evolutionary tracks of Bertelli et al. (2009) [Z=0.017,
+Y=0.26].
+
+2011.11.21: Reordered columns in table. 
+
+2011.12.2: Removed systematic uncertainty in BCv ("uBCv") and
+estimated uncertainty in logTeff (for one subtype uncertainty). J-H
+and H-Ks colors for L dwarfs come from mean estimates calculated using
+2MASS photometry with <0.1 mag photometric errors for L and T dwarfs
+within 0.5 subtype of a given subtype in the DwarfArchives.org
+database.
+
+2011.12.3: Using data from DwarfArchives.org, I fit polynomials to
+absolute J magnitude vs. subtype for L and T dwarfs. I find (x =
+subtype; 0 = 'L0', 10 = 'T0'): M_J = 1.166986798277e+01 +
+1.175748107692e+00*x - 6.522381898768e-01*x^2 + 1.992648437227e-01*x^3
+- 2.904023621364e-02*x^4 + 2.134433926696e-03*x^5 -
+7.715657229082e-05*x^6 + 1.099122975611e-06*x^7. I calculated absolute
+K magnitude using this M_J relation and the adopted J-H and H-K colors
+for each subtype. Note that the scatter in the absolute J magnitude
+vs. subtype is +-0.4 mag, and only 27 L dwarfs and 34 T dwarfs define
+the relation.
+
+2011.12.13: Slight revision to adopted masses for FGK stars and added
+masses for M0-M6 dwarfs.
+
+2011.12.21: Minor changes to bolometric correction BCv values of A/F/G
+stars at the +-0.01 mag level, from inclusion of Masana+2006 and
+Bertone+2004 BC values into the consensus estimates of BCv(Teff).
+
+2012.8.17: Minor shifts to mass scale for K5V-M5V stars taking into
+account M_Ks vs. mass calibration from Delfosse+2000. Added mass
+estimates for late M dwarfs.
+
+2012.11.25: Updated preamble text. Added list of publications citing
+this online table.
+
+2012.11.26: Updated Teff and BCv scale for O9V-B3V based on new
+assessments of median Teffs (calculated and from literature) for
+standard stars. See corresponding updates to notes in individual
+spectral type note files in directory at:
+http://www.pas.rochester.edu/~emamajek/spt/ (e.g. O9V.txt, B0V.txt,
+etc.).
+
+2012.11.30: Updated/reviewed Teff, BCv, logL for B7V, B8V, A0V based
+on reassessment of median Teffs for standards.
+
+2012.12.01: Updated/reviewed Teff, BCv, logL for B8V, B9V, B9.5V based
+on reassessment of median Teffs for standards.
+
+2012.12.10: Slight revision to Y0V Teff based on results from Leggett
+et al. 2013 (and check on Teffs for T9 and T9.5):
+http://arxiv.org/abs/1212.1210. And added line for T8.5V based on
+Teffs from Burgasser et al. 2011, Warren et al. 2007, and Burningham
+et al. 2011.
+
+2012.12.27: The M dwarf files in /spt/ are undergoing a major check up
+regarding assessing the rank/quality of standards, median colors,
+bolometric corrections, Teffs, etc. I've made a preliminary update to
+the Teff scale. Changes to colors have been minor, however the effects
+on bolometric corrections has been sizeable due to incorporation of
+results from Casagrande08, Leggett01, and Golimowski04. The overhaul
+should be done within a few weeks. 
+
+2012.12.29: Updated G2V colors and Teff. Updated notes at:
+http://www.pas.rochester.edu/~emamajek/spt/G2V.txt
+
+2013.02.16: Minor updates to logL and Mbol values. Checked logTeff values. 
+
+2013.04.23: Teff, logT, BCv, logL, and Mbol checked, with some minor
+updates, for all K subtypes. Minor update to Teff scale for M dwarfs.
+Added approximate V-K colors and Mv estimates for L0 through L3 dwarfs
+based on Dahn02 photometry.
+
+2013.06.01: Made subtle edits to color tables (usually at 0.001 mag
+level) and for thorough update before publication of much of the O9-M9
+part of the table in Pecaut & Mamajek (submitted to ApJ). Teff
+estimates were re-checked, and minor shifts made for some GKM stars
+(usually at <+-50 K level). Added V-Rc colors based on V-Ic to V-R
+trend from Caldwell et al. (1993, SAAO Circulars, 15, 1) for B through
+mid-M dwarfs, and based on average V-Ic and R-Ic colors for late Ms
+from Liebert & Gizis (2006, PASP, 118, 659). Made minors shifts to
+mass scale for late O and B stars based on including some results from
+eclipsing binary masses.
+
+2013.06.18: Updated parameters for B0.5V stars due to reexamination of
+data for Beta Sco Aa (standard star) and B3V (absolute magnitudes).
+
+2013.06.23: Slight shift in absolute magnitude and luminosity for M4V
+due to inclusion of individual abs mag estimates for M4V standards.
+
+2013.07.02: Minor shifts to adopted optical colors for M6/M7/M8/M9
+dwarfs. The mean V-Ic and V-Rc colors for these late M dwarfs are
+uncertain at the ~0.05-0.1 mag level.
+
+2013.07.05: Based on discussion in Pecaut & Mamajek (2013), we adopt
+Vmag = -26.71+-0.02 mag and BCv(Sun,G2V) = -0.11. This results in a
+systematic shift of the bolometric correction scale at the 0.04 mag
+level, where BCv(Sun) = -0.07 (old) => -0.11 (new). I have shifted all
+of the BCv and Mbol values to reflect this shift. The new solar BCv
+value is commensurate with the revised solar constant from Kopp & Lean
+(2011), and revised inferred solar luminosity (Mamajek 2012), and is
+calculated as the synthetic V magnitude needed to fit the revised
+solar irradiance constant (Kopp & Lean 2011) using Teff=5772K BT-Settl
+model using solar composition. Note that the fitting of BT-Settl
+models to the empirically derived solar colors from Ramirez12 leads to
+a solar effective temperature (5776+-22K) which is spot on with the
+measured value (5772K). A slight shift in adopted V magnitude (~0.03
+mag level, from V=-26.74 => -26.71) is needed to force the solar
+diameter measurements to that predicted from the SED-fitting.  The new
+adopted Vmag is similar to that recently derived by Engelke08 using
+several different solar spectrum calibrations (their solar V mags are
+consistent with V = -26.71+-0.01).
+
+I still need to make the minor shift to the luminosity scale. 
+
+2014.01.23: Updated introduction information to mention Pecaut &
+Mamajek (2013).
+
+2014.02.23: Included Tycho Bt-Vt colors based on a new analysis of B-V
+vs. Bt-Vt colors of nearby dwarfs stars plus a small number of lightly
+reddened O-early-B-type dwarfs. 
+
+2014.03.26: Updated J-H (2MASS system) colors for L3-Y0 dwarfs based
+on examination of Figure 5 of Kirkpatrick et al. (2011, ApJS, 197,
+19). Updated Mv estimates for L0-L5 dwarfs based on Dieterich+2014 Mvs
+as function of V-Ks.
+
+2014.11.14: Fixed equation for Av as function of E(B-V) and (B-V)o. Thanks to Cameron Bell! 
+
+# Publications which have used this table (last updated 6/1/2013)
+# Please email me if you use the table in your research and/or have
+# any questions. - EEM
+
+http://adsabs.harvard.edu/abs/2012ApJ...746..154P (Pecaut et al., 2012, ApJ, 746, 154)
+http://adsabs.harvard.edu/abs/2012ApJ...756..133C (Chen et al., 2012, ApJ, 756, 133)
+http://adsabs.harvard.edu/abs/2012ApJ...761..162H (Hynes et al., 2012, ApJ, 761, 162)
+http://adsabs.harvard.edu/abs/2012MNRAS.427.3358G (Goulding et al., 2012, MNRAS, 427, 3358)
+http://adsabs.harvard.edu/abs/2013ApJ...766....6B (Barenfeld et al., 2013, ApJ, 766, 6)
+http://adsabs.harvard.edu/abs/2013MNRAS.428.3543R (Ratti et al., 2013, MNRAS, 428, 3543)
+http://adsabs.harvard.edu/abs/2013MNRAS.428.2118D (de Marco et al., 2013, MNRAS, 428, 2118)
+http://adsabs.harvard.edu/abs/2013MNRAS.431L..10R (Ratti et al., 2013, MNRAS, 431, L10)
+(Konishi et al., 2014, PASJ, in press)

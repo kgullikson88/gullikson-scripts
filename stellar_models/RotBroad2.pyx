@@ -4,7 +4,7 @@ cimport numpy as np
 cimport cython
 from libc.math cimport sqrt
 from astropy import constants, units
-import FittingUtilities
+from utils import FittingUtilities
 from scipy.signal import fftconvolve
 import warnings
 
