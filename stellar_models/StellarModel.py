@@ -6,7 +6,7 @@ from collections import defaultdict
 import warnings
 from collections import OrderedDict
 import itertools
-from utils import FittingUtilities, DataStructures, HelperFunctions
+from utils import FittingUtilities, DataStructures
 from stellar_model import Broaden
 import logging
 from astropy import units
@@ -713,6 +713,7 @@ class KuruczGetter():
                     You need to keep this as small as possible to avoid memory issues!
                     The whole grid would take about 36 GB of RAM!
         """
+        import HelperFunctions
         self.rebin = rebin
         self.debug = debug
 
@@ -950,6 +951,7 @@ class PhoenixGetter():
         other args: The minimum and maximum values for the parameters to search.
                     You need to keep this as small as possible to avoid memory issues!
         """
+        import HelperFunctions
         self.rebin = rebin
         self.debug = debug
 

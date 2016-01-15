@@ -7,7 +7,7 @@ import logging
 from scipy.interpolate import UnivariateSpline, griddata
 import pandas
 
-from utils import HelperFunctions, DataStructures
+from utils import DataStructures
 import os
 
 import numpy as np
@@ -126,6 +126,7 @@ class FunctionFits():
         :param independent_var: The variable you want to evaluate the function at
         :keyword is_spt: A boolean flag for whether the independent variable is a spectral type
         """
+        import HelperFunctions
         if is_spt:
             if HelperFunctions.IsListlike(independent_var):
                 independent_var = [re.search(SPT_PATTERN, s).group() for s in independent_var]
@@ -161,6 +162,7 @@ class FunctionFits():
                              you a warning if the best fit is an extrapolation.
         :return: The color corresponding to the requested temperature
         """
+        import HelperFunctions
         # Determine the test values from search_range
         if isinstance(search_range, str) and search_range.lower() == 'valid':
             test_values = np.linspace(fv.valid[0], fv.valid[1], 1000)
@@ -206,6 +208,7 @@ class Interpolator():
         self.sptnum_to_teff = UnivariateSpline(sptnum, df.Teff.values, s=0)
 
     def evaluate(self, interp, spt):
+        import HelperFunctions
         if HelperFunctions.IsListlike(spt):
             spt = [re.search(SPT_PATTERN, s).group() for s in spt]
             sptnum = np.array([self.MS.SpT_To_Number(s) for s in spt])
@@ -603,263 +606,6 @@ class MainSequence:
             return self.Number_To_SpT(num2)
 
 
-########################################################
-########               Pre-Main Sequence         #######
-########################################################
-
-
-homedir = os.environ["HOME"] + "/"
-tracksfile = homedir + "Dropbox/School/Research/Stellar_Evolution/Padova_Tracks.dat"
-
-class PreMainSequence:
-    def __init__(self, pms_tracks_file=tracksfile, track_source="Padova", minimum_stage=0, maximum_stage=1):
-        #We need an instance of MainSequence to get temperature from spectral type
-        self.MS = MainSequence()
-
-        #Now, read in the evolutionary tracks
-        if track_source.lower() == "padova":
-            self.Tracks = self.ReadPadovaTracks(pms_tracks_file, minimum_stage=minimum_stage,
-                                                maximum_stage=maximum_stage)
-        elif track_source.lower() == "baraffe":
-            self.Tracks = self.ReadBaraffeTracks(pms_tracks_file)
-
-
-    def ReadPadovaTracks(self, pms_tracks_file, minimum_stage, maximum_stage):
-        infile = open(pms_tracks_file)
-        lines = infile.readlines()
-        infile.close()
-        Tracks = defaultdict(lambda: defaultdict(list))
-        self.Mass = []
-        self.InitialMass = []
-        self.Luminosity = []
-        self.Gravity = []
-        self.Age = []
-        self.Temperature = []
-        for line in lines:
-            if not line.startswith("#"):
-                segments = line.split()
-                age = float(segments[1])
-                m_initial = float(segments[2])  #Initial mass
-                mass = float(segments[3])
-                Lum = float(segments[4])  #Luminosity
-                Teff = float(segments[5])  #Effective temperature
-                logg = float(segments[6])  #gravity
-                evol_stage = int(segments[-1])
-
-                if (minimum_stage <= evol_stage <= maximum_stage and
-                        (len(Tracks[age]["Mass"]) == 0 or Tracks[age]["Mass"][-1] < mass)):
-                    Tracks[age]["Initial Mass"].append(m_initial)
-                    Tracks[age]["Mass"].append(mass)
-                    Tracks[age]["Temperature"].append(Teff)
-                    Tracks[age]["Luminosity"].append(Lum)
-                    Tracks[age]["Gravity"].append(logg)
-                    self.Mass.append(mass)
-                    self.InitialMass.append(m_initial)
-                    self.Luminosity.append(Lum)
-                    self.Gravity.append(logg)
-                    self.Temperature.append(Teff)
-                    self.Age.append(age)
-
-        return Tracks
-
-
-    def ReadBaraffeTracks(self, pms_tracks_file):
-        infile = open(pms_tracks_file)
-        lines = infile.readlines()
-        infile.close()
-        Tracks = defaultdict(lambda: defaultdict(list))
-        for i, line in enumerate(lines):
-            if "log t (yr)" in line:
-                age = float(line.split()[-1])
-                j = i + 4
-                while "----" not in lines[j] and lines[j].strip() != "":
-                    segments = lines[j].split()
-                    mass = float(segments[0])
-                    Teff = float(segments[1])
-                    logg = float(segments[2])
-                    Lum = float(segments[3])
-                    Tracks[age]["Mass"].append(mass)
-                    Tracks[age]["Temperature"].append(np.log10(Teff))
-                    Tracks[age]["Luminosity"].append(Lum)
-                    Tracks[age]["Gravity"].append(logg)
-                    j += 1
-
-        return Tracks
-
-
-    def GetEvolution(self, mass, key='Temperature'):
-        #Need to find the first and last ages that have the requested mass
-        first_age = 9e9
-        last_age = 0.0
-        Tracks = self.Tracks
-        ages = sorted(Tracks.keys())
-        ret_ages = []
-        ret_value = []
-        for age in ages:
-            if min(Tracks[age]["Mass"]) < mass and max(Tracks[age]["Mass"]) > mass:
-                T = self.GetTemperature(mass, 10 ** age)
-                if key == "Temperature":
-                    ret_value.append(T)
-                else:
-                    ret_value.append(self.GetFromTemperature(10 ** age, T, key=key))
-                ret_ages.append(10 ** age)
-        return ret_ages, ret_value
-
-
-    def GetFromTemperature(self, age, temperature, key='Mass'):
-        # Check that the user gave a valid key
-        valid = ["Initial Mass", "Mass", "Luminosity", "Gravity", "Radius"]
-        if key not in valid:
-            print "Error! 'key' keyword must be one of the following"
-            for v in valid:
-                print "\t%s" % v
-            sys.exit()
-        elif key == "Radius":
-            #We need to get this from the luminosity and temperature
-            lum = self.GetFromTemperature(age, temperature, key="Luminosity")
-            return np.sqrt(lum) / (temperature / 5780.0) ** 2
-
-
-        # Otherwise, interpolate
-        Tracks = self.Tracks
-        ages = sorted([t for t in Tracks.keys() if 10 ** t >= 0.5 * age and 10 ** t <= 2.0 * age])
-        points = []
-        values = []
-        for t in ages:
-            temps = sorted(Tracks[t]['Temperature'])
-            val = sorted(Tracks[t][key])
-            for T, V in zip(temps, val):
-                points.append((t, T))
-                values.append(V)
-        xi = np.array([[np.log10(age), np.log10(temperature)], ])
-        points = np.array(points)
-        values = np.array(values)
-
-        val = griddata(points, values, xi, method='linear')
-        if np.isnan(val):
-            warnings.warn("Requested temperature (%g) at this age (%g) is outside of grid!" % (temperature, age))
-            val = griddata(points, values, xi, method='nearest')
-
-        if key == "Luminosity" or key == "Temperature":
-            val = 10 ** val
-        return float(val)
-
-
-    def Interpolate(self, SpT, age, key="Mass"):
-        Teff = self.MS.Interpolate(self.MS.Temperature, SpT)
-        return self.GetFromTemperature(age, Teff, key)
-
-
-    def GetTemperature(self, mass, age):
-        Tracks = self.Tracks
-        ages = sorted([t for t in Tracks.keys() if 10 ** t >= 0.5 * age and 10 ** t <= 2.0 * age])
-        points = []
-        values = []
-        for t in ages:
-            temps = sorted(Tracks[t]['Temperature'])
-            masses = sorted(Tracks[t]['Mass'])
-            for T, M in zip(temps, masses):
-                points.append((t, M))
-                values.append(T)
-        xi = np.array([[np.log10(age), mass], ])
-        points = np.array(points)
-        values = np.array(values)
-        val = griddata(points, values, xi, method='linear')
-        if np.isnan(val):
-            warnings.warn("Requested temperature (%g) at this age (%g) is outside of grid!" % (temperature, age))
-            val = griddata(points, values, xi, method='nearest')
-        return 10 ** float(val)
-
-
-    def GetMainSequenceAge(self, mass, key='Mass'):
-        Tracks = self.Tracks
-        ages = sorted(Tracks.keys())
-        if key.lower() == "temperature":
-            age = 100e6
-            old_age = 0
-            while abs(age - old_age) / age > 0.05:
-                old_age = age
-                m = self.GetFromTemperature(old_age, mass, key="Mass")
-                age = self.GetMainSequenceAge(m) * 0.2
-            return age
-        elif key.lower() != 'mass':
-            raise ValueError("Error! key = %s not supported in GetMainSequenceAge!" % key)
-
-        #Find the masses that are common to at least the first few ages
-        common_masses = list(Tracks[ages[0]]["Mass"])
-        tol = 0.001
-        for i in range(1, 3):
-            age = ages[i]
-            masses = np.array(Tracks[age]["Mass"])
-            length = len(common_masses)
-            badindices = []
-            for j, m in enumerate(common_masses[::-1]):
-                if np.min(np.abs(m - masses)) > tol:
-                    badindices.append(length - 1 - j)
-            for idx in badindices:
-                common_masses.pop(idx)
-
-
-        #Find the mass closest to the requested one.
-        m1, m2 = HelperFunctions.GetSurrounding(common_masses, mass)
-        if m1 < mass and m1 == common_masses[-1]:
-            warnings.warn(
-                "Requested mass ( %g ) is above the highest common mass in the evolutionary tracks ( %g )" % (mass, m1))
-        elif m1 > mass and m1 == common_masses[0]:
-            warnings.warn(
-                "Requested mass ( %g ) is below the lowest common mass in the evolutionary tracks ( %g )" % (mass, m1))
-        age1 = 0.0
-        age2 = 0.0
-
-        done = False
-        i = 1
-        while not done and i < len(ages):
-            age = ages[i]
-            masses = np.array(Tracks[age]["Mass"])
-            done = True
-            if np.min(np.abs(m1 - masses)) <= tol:
-                age1 = age
-                done = False
-            if np.min(np.abs(m2 - masses)) <= tol:
-                age2 = age
-                done = False
-            i += 1
-
-        return 10 ** ((age1 - age2) / (m1 - m2) * (mass - m1) + age1)
-
-
-    def GetSpectralType(self, temperature, interpolate=False):
-        return self.MS.GetSpectralType(self, self.MS.Temperature, value, interpolate)
-
-
-    #Get the factor you would need to multiply these tracks by to make the given star agree with MS relations
-    def GetFactor(self, temperature, key='Mass'):
-        MS_age = self.GetMainSequenceAge(temperature, key="Temperature")
-        tracks_value = self.GetFromTemperature(MS_age, temperature, key=key)
-
-        #Get the value from main sequence relations. The call signature is different, so need if statements
-        spt = self.MS.GetSpectralType(self.MS.Temperature, temperature)
-        if key.lower() == "mass":
-            msr_value = self.MS.Interpolate(self.MS.Mass, spt)
-        elif key.lower() == "radius":
-            msr_value = self.MS.Interpolate(self.MS.Radius, spt)
-        else:
-            raise ValueError("Error! Key %s not allowed!" % key)
-
-        return msr_value / tracks_value
-
-
-if __name__ == "__main__":
-    sptr = MainSequence()
-    pms = PreMainSequence()
-    for spt in ["K9", "K5", "K0", "G5", "G0"]:
-        temp = sptr.Interpolate(sptr.Temperature, spt)
-        radius = sptr.Interpolate(sptr.Radius, spt)
-        print "%s:  T=%g\tR=%g" % (spt, temp, radius)
-        print pms.Interpolate(spt, 1000, "radius")
-
-    
-    
     
     
     
