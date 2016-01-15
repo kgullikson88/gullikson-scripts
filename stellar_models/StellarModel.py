@@ -1,4 +1,4 @@
-__author__ = 'Kevin Gullikson'
+
 import os
 import sys
 import re
@@ -6,7 +6,7 @@ from collections import defaultdict
 import warnings
 from collections import OrderedDict
 import itertools
-import FittingUtilities
+from utils import FittingUtilities, DataStructures, HelperFunctions, Broaden
 import logging
 from astropy import units
 
@@ -16,9 +16,6 @@ import pandas
 import numpy as np
 import h5py
 
-import DataStructures
-import HelperFunctions
-import Broaden
 
 
 """
