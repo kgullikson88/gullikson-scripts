@@ -5,7 +5,7 @@ sns.set_style('ticks')
 sns.set_context('notebook', font_scale=1.5)
 
 def add_spt_axis(axis, spt_values=('M5', 'M0', 'K5', 'K0', 'G5', 'G0')):
-    import SpectralTypeRelations
+    from spectral_type import SpectralTypeRelations
     MS = SpectralTypeRelations.MainSequence()
     # Find the temperatures at each spectral type
     temp_values = MS.Interpolate('Temperature', spt_values)

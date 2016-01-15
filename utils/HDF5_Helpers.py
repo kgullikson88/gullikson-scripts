@@ -7,11 +7,10 @@ import h5py
 import numpy as np
 import pandas as pd
 
-import Analyze_CCF
-from GenericSmooth import roundodd
-from HelperFunctions import mad, integral
-import CCF_Systematics
-import Fitters
+from cross_correlation import Analyze_CCF
+from HelperFunctions import roundodd, mad, integral
+from cross_correlation import CCF_Systematics
+import fitters
 
 
 home = os.environ['HOME']
@@ -239,10 +238,10 @@ class Full_CCF_Interface(object):
                        'HET': '{}/School/Research/HET_data/SyntheticData/'.format(home),
                        'CHIRON': '{}/School/Research/CHIRON_data/SyntheticData/'.format(home),
                        'IGRINS': '{}/School/Research/IGRINS_data/SyntheticData/'.format(home)}
-        self._fitters = {'TS23': Fitters.Bayesian_LS,
-                         'HET': Fitters.Bayesian_LS,
-                         'CHIRON': Fitters.Bayesian_LS,
-                         'IGRINS': Fitters.Bayesian_LS}
+        self._fitters = {'TS23': fitters.Bayesian_LS,
+                         'HET': fitters.Bayesian_LS,
+                         'CHIRON': fitters.Bayesian_LS,
+                         'IGRINS': fitters.Bayesian_LS}
         self._flatchain_format = '{directory}{instrument}_{addmode}_flatchain.npy'
         self._flatlnprob_format = '{directory}{instrument}_{addmode}_flatlnprob.npy'
         self._uncertainty_scale = '{directory}{instrument}_{addmode}uncertainty_scalefactor.txt'

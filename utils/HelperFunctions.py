@@ -19,8 +19,7 @@ from statsmodels.stats.proportion import proportion_confint
 import pandas as pd
 
 import DataStructures
-import pySIMBAD as sim
-import SpectralTypeRelations
+from spectral_type import SpectralTypeRelations
 import readmultispec as multispec
 
 
@@ -49,15 +48,42 @@ def ensure_dir(f):
         d = f
     if not os.path.exists(d):
         os.makedirs(d)
+        
+
+def SmoothData(order, windowsize=91, smoothorder=5, lowreject=3, highreject=3, numiters=10, expand=0, normalize=True):
+    denoised = Denoise(order.copy())
+    denoised.y = FittingUtilities.Iterative_SV(denoised.y,
+                                               windowsize,
+                                               smoothorder,
+                                               lowreject=lowreject,
+                                               highreject=highreject,
+                                               numiters=numiters,
+                                               expand=expand)
+    if normalize:
+        denoised.y /= denoised.y.max()
+    return denoised
+
+
+def roundodd(num):
+    rounded = round(num)
+    if rounded % 2 != 0:
+        return rounded
+    else:
+        if rounded > num:
+            return rounded - 1
+        else:
+            return rounded + 1
+
 
 
 def GetStarData(starname):
     """
       Return a dictionary with the SimBad data for a given star.
     """
-    link = sim.buildLink(starname)
-    star = sim.simbad(link)
-    return star
+    raise NotImplementedError
+    #link = sim.buildLink(starname)
+    #star = sim.simbad(link)
+    #return star
 
 
 WDS_location = "%s/Dropbox/School/Research/AstarStuff/TargetLists/WDS_MagLimited.csv" % (os.environ["HOME"])

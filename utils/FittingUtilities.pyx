@@ -125,12 +125,6 @@ def Continuum(x, y, fitorder=3, lowreject=2, highreject=4, numiter=10000, functi
   return fit(x - x2.mean())
 
 
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 5c3564008b3dcbebc050d05842c4aab20b44869b
 
 
 def savitzky_golay(y, window_size, order, deriv=0, rate=1):
