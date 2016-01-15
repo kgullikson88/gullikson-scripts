@@ -17,7 +17,7 @@ from bokeh.models.widgets import HBox, VBox, VBoxForm, Select
 from bokeh.io import hplot
 
 from Analyze_CCF import CCF_Interface
-from HDF5_Helpers import Full_CCF_Interface
+from utils.HDF5_Helpers import Full_CCF_Interface
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)

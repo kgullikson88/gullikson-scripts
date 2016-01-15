@@ -1,18 +1,16 @@
-__author__ = 'Kevin Gullikson'
 
 """
 This is a general script for doing the cross-correlations in my companion search.
 It is called by several smaller scripts in each of the instrument-specific repositories
 """
 
-import FittingUtilities
+from utils import FittingUtilities, DataStructures
 
 import numpy as np
 
-import DataStructures
 import Correlate
-import HelperFunctions
-import StellarModel
+from utils import HelperFunctions
+from stellar_model import StellarModel
 
 
 try:
@@ -24,9 +22,9 @@ from astropy.io import fits
 from astropy.time import Time
 import subprocess
 from collections import defaultdict
-import StarData
-import SpectralTypeRelations
-import Broaden
+from utils import StarData
+from spectral_type import SpectralTypeRelations
+from stellar_model import Broaden
 from astropy import units as u
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 import re

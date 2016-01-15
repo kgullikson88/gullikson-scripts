@@ -16,10 +16,10 @@ import george
 import emcee
 import h5py
 
-import Fitters
-import StarData
-import SpectralTypeRelations
-from HelperFunctions import mad, integral
+import fitters
+from utils import StarData
+from utils.HelperFunctions import mad, integral
+from spectral_type import SpectralTypeRelations
 
 
 def classify_filename(fname, type='bright'):
@@ -569,7 +569,7 @@ def get_initial_uncertainty(df):
     return summary
 
 
-class GPFitter(Fitters.Bayesian_LS):
+class GPFitter(fitters.Bayesian_LS):
     def _lnlike(self, pars):
         """
         likelihood function. This uses the class variables for x,y,xerr, and yerr, as well as the 'model' instance.
@@ -623,7 +623,7 @@ class GPFitter(Fitters.Bayesian_LS):
         return np.array(yvals)
 
 
-class ModifiedPolynomial(Fitters.Bayesian_LS):
+class ModifiedPolynomial(fitters.Bayesian_LS):
     def model(self, p, x):
         s, m = 10**p[:2]
         polypars = p[2:]
@@ -780,7 +780,7 @@ def correct_measured_temperature(df, fitter, cache=None):
     Given a dataframe such as output by get_ccf_data (with N > 1), correct the temperatures to
     account for the measurement bias.
     :param df: A dataframe with the CCF data
-    :param fitter: A Fitters.Bayesian_TLS instance that contains fitted parameters for the measurement bias
+    :param fitter: A fitters.Bayesian_TLS instance that contains fitted parameters for the measurement bias
     :param cache: A pandas dataframe that gives MCMC samples of the temperature measurement
                  for various actual temperatures.
     :return:

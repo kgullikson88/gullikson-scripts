@@ -3,16 +3,14 @@ import os
 import warnings
 import logging
 from astropy import units, constants
-import FittingUtilities
-import RotBroad_Fast as RotBroad
+from utils import FittingUtilities, DataStructures, HelperFunctions
+from stellar_model.Broaden import RotBroad
 
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.optimize import minimize, minimize_scalar
 import numpy as np
 
-import DataStructures
-import HelperFunctions
-from PlotBlackbodies import Planck
+from utils.PlotBlackbodies import Planck
 import Normalized_Xcorr
 
 

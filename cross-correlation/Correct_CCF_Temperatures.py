@@ -10,7 +10,7 @@ import pandas as pd
 import numpy as np
 from sklearn.neighbors import KernelDensity
 
-import HDF5_Helpers
+from utils import HDF5_Helpers
 
 
 # Make a cache to speed things up
