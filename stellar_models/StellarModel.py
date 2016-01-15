@@ -6,7 +6,8 @@ from collections import defaultdict
 import warnings
 from collections import OrderedDict
 import itertools
-from utils import FittingUtilities, DataStructures, HelperFunctions, Broaden
+from utils import FittingUtilities, DataStructures, HelperFunctions
+from stellar_model import Broaden
 import logging
 from astropy import units
 
