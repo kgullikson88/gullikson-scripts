@@ -22,15 +22,14 @@ requires = ['h5py',
             'astroquery',
             ]
 
-data_files = [('', ['data/Mamajek_Table.txt',
-                    'data/Pecaut2013.tsv'])]
+data_files = {'spectral_type': ['data/*']}
 
 optional_requires = ['astropysics',
                      'pyraf', 'mlpy',
                      'anfft']
 
 setup(name='gullikson-scripts',
-      version='0.1',
+      version='0.1.3',
       author='Kevin Gullikson',
       author_email='kevin.gullikson@gmail.com',
       url="https://github.com/kgullikson88/gullikson-scripts",
@@ -45,17 +44,18 @@ setup(name='gullikson-scripts',
       packages=['cross_correlation', 'isochrone_helpers', 'fitters', 
                 'utils', 'spectral_type', 'stellar_models'],
       
-      data_files=data_files,
+      package_data=data_files,
       setup_requires=['cython', 'numpy>=1.6'],
       cmdclass={'build_ext': build_ext},
       ext_modules=[
-          Extension("stellar_models/RotBroad_Fast", ["stellar_models/RotBroad2.pyx"], 
+          Extension("stellar_models.RotBroad_Fast", ["stellar_models/RotBroad2.pyx"], 
                     include_dirs=[np.get_include()], extra_compile_args=["-O3"]),
-          Extension("utils/FittingUtilities", ["utils/FittingUtilities.pyx"],
+          Extension("utils.FittingUtilities", ["utils/FittingUtilities.pyx"],
                     include_dirs=[np.get_include()],
                     extra_compile_args=["-O3", "-funroll-loops"]),
       ],
       install_requires=requires,
       extras_require={'Extra stuff': optional_requires},
+      include_package_data=True
 
 )
