@@ -22,14 +22,15 @@ requires = ['h5py',
             'astroquery',
             ]
 
-data_files = {'spectral_type': ['data/*']}
+data_files = {'spectral_type': ['data/*'],
+              'stellar_data': ['data/*']}
 
 optional_requires = ['astropysics',
                      'pyraf', 'mlpy',
                      'anfft']
 
 setup(name='gullikson-scripts',
-      version='0.1.4',
+      version='0.1.5',
       author='Kevin Gullikson',
       author_email='kevin.gullikson@gmail.com',
       url="https://github.com/kgullikson88/gullikson-scripts",
