@@ -2,14 +2,14 @@ import sys
 import os
 import warnings
 import logging
-from astropy import units, constants
-from utils import FittingUtilities, DataStructures, HelperFunctions
-from stellar_models.Broaden import RotBroad
 
+from astropy import units, constants
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
-from scipy.optimize import minimize, minimize_scalar
+from scipy.optimize import minimize_scalar
 import numpy as np
 
+from utils import FittingUtilities, DataStructures, HelperFunctions
+from stellar_models.Broaden import RotBroad
 from utils.PlotBlackbodies import Planck
 import Normalized_Xcorr
 

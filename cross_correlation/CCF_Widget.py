@@ -2,10 +2,7 @@
 Bokeh widget for analyzing CCF data.
 """
 
-import os
 from collections import OrderedDict
-import sys
-import time
 import logging
 
 from bokeh.models import ColumnDataSource, Plot, HoverTool
@@ -14,10 +11,8 @@ from bokeh.properties import String, Instance
 from bokeh.server.app import bokeh_app
 from bokeh.server.utils.plugins import object_page
 from bokeh.models.widgets import HBox, VBox, VBoxForm, Select
-from bokeh.io import hplot
-
-from Analyze_CCF import CCF_Interface
 from utils.HDF5_Helpers import Full_CCF_Interface
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)

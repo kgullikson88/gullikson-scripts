@@ -4,10 +4,9 @@ This is a general script for doing the cross-correlations in my companion search
 It is called by several smaller scripts in each of the instrument-specific repositories
 """
 
-from utils import FittingUtilities, DataStructures
-
 import numpy as np
 
+from utils import FittingUtilities, DataStructures
 import Correlate
 from utils import HelperFunctions
 from stellar_models import StellarModel, Broaden

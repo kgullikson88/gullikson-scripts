@@ -5,10 +5,11 @@ Defines a few functions linear fits
 from __future__ import print_function, division, absolute_import
 
 import numpy as np
-import statsmodels.api as sm
-from statsmodels.robust.norms import TukeyBiweight
 from astropy.modeling import fitting
 from astropy.modeling.polynomial import Chebyshev2D
+
+import statsmodels.api as sm
+from statsmodels.robust.norms import TukeyBiweight
 
 
 def RobustFit(x, y, fitorder=3, weight_fcn=TukeyBiweight(), badregions=None):

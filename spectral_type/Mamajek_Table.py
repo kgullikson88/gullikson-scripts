@@ -1,8 +1,8 @@
 import os
 
-import pandas as pd
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 
+import pandas as pd
 import SpectralTypeRelations
 
 _ROOT = os.path.abspath(os.path.dirname(__file__))

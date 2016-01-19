@@ -7,11 +7,8 @@
 from scipy.special import erf  # Error function
 from scipy.signal import fftconvolve
 
-from FittingUtilities import ReduceResolution, ReduceResolution2
 import numpy as np
 from astropy import constants, units
-
-from RotBroad_Fast import Broaden as RotBroad
 
 
 def MacroBroad(data, vmacro, extend=True):

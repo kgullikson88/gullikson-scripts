@@ -2,13 +2,10 @@ import pylab
 import numpy as np
 from astropy import units, constants
 from scipy.interpolate import UnivariateSpline
-import scipy.signal
-import sys
+
 from utils import DataStructures
-from spectral_type import SpectralTypeRelations
 from utils.FittingUtilities import Continuum as FindContinuum
-import matplotlib.pyplot as plt
-import warnings
+
 
 pi = np.pi
 

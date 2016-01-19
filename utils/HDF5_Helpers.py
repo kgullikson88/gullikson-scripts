@@ -5,8 +5,8 @@ from collections import defaultdict
 
 import h5py
 import numpy as np
-import pandas as pd
 
+import pandas as pd
 from cross_correlation import Analyze_CCF
 from HelperFunctions import roundodd, mad, integral
 from cross_correlation import CCF_Systematics

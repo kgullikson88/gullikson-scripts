@@ -13,9 +13,9 @@ import warnings
 
 import numpy as np
 from scipy.optimize import fmin
-import pandas as pd
 import matplotlib.pyplot as plt
 
+import pandas as pd
 from utils.HelperFunctions import ensure_dir
 
 

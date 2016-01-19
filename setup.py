@@ -29,7 +29,7 @@ optional_requires = ['astropysics',
                      'anfft']
 
 setup(name='gullikson-scripts',
-      version='0.1.3',
+      version='0.1.4',
       author='Kevin Gullikson',
       author_email='kevin.gullikson@gmail.com',
       url="https://github.com/kgullikson88/gullikson-scripts",

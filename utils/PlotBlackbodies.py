@@ -1,8 +1,5 @@
-import sys
-from scipy.interpolate import UnivariateSpline
-
 import numpy as np
-from astropy import constants, units
+from astropy import constants
 
 
 def Planck(x, T):

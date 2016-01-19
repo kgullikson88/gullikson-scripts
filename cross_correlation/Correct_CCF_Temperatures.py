@@ -6,11 +6,10 @@ The correction needed is determined in the iPython notebook 'CheckCCFSystematics
 
 import os
 
-import pandas as pd
 import numpy as np
 from sklearn.neighbors import KernelDensity
 
-from utils import HDF5_Helpers
+import pandas as pd
 
 
 # Make a cache to speed things up
@@ -156,6 +155,7 @@ def get_real_temperature_newmethod(df, addmode='simple'):
     :param addmode: The way the individual order CCFs were co-added
     :return:
     """
+    from utils import HDF5_Helpers
     hdf_interface = HDF5_Helpers.Full_CCF_Interface()
 
     # Group by the star name.

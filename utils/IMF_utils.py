@@ -3,8 +3,10 @@ Various codes to work with the initial mass function. Stolen shamelessly from
 Adam Ginsburg's agpy code:
 https://code.google.com/p/agpy/source/browse/trunk/agpy/imf.py
 """
-import numpy as np
 import types # I use typechecking.  Is there a better way to do this?  (see inverse_imf below)
+
+import numpy as np
+
 
 class MassFunction(object):
     """

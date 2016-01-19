@@ -1,4 +1,3 @@
-
 import os
 import sys
 import re
@@ -6,17 +5,17 @@ from collections import defaultdict
 import warnings
 from collections import OrderedDict
 import itertools
-from utils import FittingUtilities, DataStructures
-import Broaden
 import logging
-from astropy import units
 
+from astropy import units
 from scipy.interpolate import InterpolatedUnivariateSpline as spline, LinearNDInterpolator, NearestNDInterpolator, \
     interp1d
-import pandas
 import numpy as np
 import h5py
 
+from utils import FittingUtilities, DataStructures
+import Broaden
+import pandas
 
 
 """

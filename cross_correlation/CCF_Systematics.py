@@ -5,17 +5,17 @@ from operator import itemgetter
 import logging
 import sys
 
-import pandas as pd
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.integrate import quad
 from scipy.optimize import minimize_scalar, fmin
-from george import kernels
 import matplotlib.pyplot as plt
 import numpy as np
-import george
 import emcee
 import h5py
 
+import pandas as pd
+from george import kernels
+import george
 import fitters
 from utils import StarData
 from utils.HelperFunctions import mad, integral

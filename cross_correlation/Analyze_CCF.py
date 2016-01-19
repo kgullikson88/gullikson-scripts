@@ -7,8 +7,9 @@ import logging
 
 import h5py
 import numpy as np
-import pandas as pd
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
+
+import pandas as pd
 
 
 class CCF_Interface(object):

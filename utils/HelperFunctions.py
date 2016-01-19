@@ -6,8 +6,8 @@ import os
 import csv
 from collections import defaultdict
 import logging
-from astropy import units as u, constants
 
+from astropy import units as u, constants
 from scipy.optimize import bisect
 from scipy.stats import scoreatpercentile
 from scipy.signal import kaiserord, firwin, lfilter
@@ -15,9 +15,9 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline, Univariate
 from astropy.io import fits as pyfits
 import numpy as np
 from astropy.time import Time
+
 from statsmodels.stats.proportion import proportion_confint
 import pandas as pd
-
 import DataStructures
 from spectral_type import SpectralTypeRelations
 import readmultispec as multispec

@@ -2,13 +2,15 @@ import sys
 import os
 import logging
 
+from astropy.io import fits
+import numpy as np
+
 from astroquery.simbad import Simbad
 import astroquery
 import pandas as pd
-from astropy.io import fits
-import numpy as np
 import stellar_data
 from HelperFunctions import convert_to_hex
+
 
 
 #Simbad.SIMBAD_URL = 'http://simbak.cfa.harvard.edu/simbad/sim-script'
