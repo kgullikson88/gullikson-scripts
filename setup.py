@@ -20,6 +20,8 @@ requires = ['h5py',
             'pymultinest',
             'seaborn',
             'astroquery',
+            'isochrones',
+            'configobj'
             ]
 
 data_files = {'spectral_type': ['data/*'],
@@ -30,7 +32,7 @@ optional_requires = ['astropysics',
                      'anfft']
 
 setup(name='gullikson-scripts',
-      version='0.1.5',
+      version='0.1.7',    #Normal Pypi should be at 0.1.3 once this works
       author='Kevin Gullikson',
       author_email='kevin.gullikson@gmail.com',
       url="https://github.com/kgullikson88/gullikson-scripts",
@@ -43,7 +45,7 @@ setup(name='gullikson-scripts',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.7',],
       packages=['cross_correlation', 'isochrone_helpers', 'fitters', 
-                'utils', 'spectral_type', 'stellar_models'],
+                'utils', 'spectral_type', 'stellar_models', 'stellar_data'],
       
       package_data=data_files,
       setup_requires=['cython', 'numpy>=1.6'],

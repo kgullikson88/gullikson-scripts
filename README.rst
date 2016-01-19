@@ -10,6 +10,6 @@ If you use anaconda python, use:
 
 .. code:: bash
 
-    conda install h5py pandas scipy matplotlib bokeh==0.10 astropy scikit-learn cython seaborn
+    conda install h5py pandas scipy matplotlib bokeh==0.10 astropy scikit-learn cython seaborn pytables
     python setup.py install
     
