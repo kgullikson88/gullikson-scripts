@@ -32,7 +32,7 @@ optional_requires = ['astropysics',
                      'anfft']
 
 setup(name='gullikson-scripts',
-      version='0.1.7',    #Normal Pypi should be at 0.1.3 once this works
+      version='0.1.3',
       author='Kevin Gullikson',
       author_email='kevin.gullikson@gmail.com',
       url="https://github.com/kgullikson88/gullikson-scripts",
