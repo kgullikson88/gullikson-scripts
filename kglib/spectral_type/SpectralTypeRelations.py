@@ -7,7 +7,7 @@ from scipy.interpolate import UnivariateSpline
 import numpy as np
 
 import pandas
-from utils import DataStructures
+from kglib.utils import DataStructures
 
 
 _ROOT = os.path.abspath(os.path.dirname(__file__))
