@@ -19,7 +19,7 @@ from astropy.time import Time
 from statsmodels.stats.proportion import proportion_confint
 import pandas as pd
 import DataStructures
-from spectral_type import SpectralTypeRelations
+from kglib.spectral_type import SpectralTypeRelations
 import readmultispec as multispec
 
 
@@ -964,7 +964,7 @@ def get_max_separation(p_spt, s_temp, v, d=1.0 * u.parsec):
     :return:        The maximum primary-->secondary separation, in arcseconds
     """
     # Convert the companion temperature and primary spectral type to mass
-    import Mamajek_Table
+    from kglib.spectral_type import Mamajek_Table
 
     MS = SpectralTypeRelations.MainSequence()
     MT = Mamajek_Table.MamajekTable()

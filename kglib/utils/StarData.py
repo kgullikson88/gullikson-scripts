@@ -8,7 +8,7 @@ import numpy as np
 from astroquery.simbad import Simbad
 import astroquery
 import pandas as pd
-import stellar_data
+from kglib import stellar_data
 from HelperFunctions import convert_to_hex
 
 
