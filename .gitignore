@@ -3,3 +3,6 @@ build
 *egg*
 .idea*
 dist
+kglib/stellar_models/RotBroad_Fast.so
+kglib/utils/FittingUtilities.so
+pyraf
