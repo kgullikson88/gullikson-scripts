@@ -125,7 +125,7 @@ class FunctionFits():
         :param independent_var: The variable you want to evaluate the function at
         :keyword is_spt: A boolean flag for whether the independent variable is a spectral type
         """
-        import HelperFunctions
+        from kglib.utils import HelperFunctions
         if is_spt:
             if HelperFunctions.IsListlike(independent_var):
                 independent_var = [re.search(SPT_PATTERN, s).group() for s in independent_var]
@@ -161,7 +161,7 @@ class FunctionFits():
                              you a warning if the best fit is an extrapolation.
         :return: The color corresponding to the requested temperature
         """
-        import HelperFunctions
+        from kglib.utils import HelperFunctions
         # Determine the test values from search_range
         if isinstance(search_range, str) and search_range.lower() == 'valid':
             test_values = np.linspace(fv.valid[0], fv.valid[1], 1000)
@@ -207,7 +207,7 @@ class Interpolator():
         self.sptnum_to_teff = UnivariateSpline(sptnum, df.Teff.values, s=0)
 
     def evaluate(self, interp, spt):
-        import HelperFunctions
+        from kglib.utils import HelperFunctions
         if HelperFunctions.IsListlike(spt):
             spt = [re.search(SPT_PATTERN, s).group() for s in spt]
             sptnum = np.array([self.MS.SpT_To_Number(s) for s in spt])
