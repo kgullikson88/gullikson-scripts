@@ -250,10 +250,10 @@ def find_best_pars(df, velocity='highest', vel_arr=np.arange(-900.0, 900.0, 0.1)
             best = good.loc[good.ccf_max == good.ccf_max.max()]
             #best = good
             if len(best) != 1 or any(np.isnan(best['CCF'].item())):
-                print best
-                print good
-                print good.ccf_max
-                print good.ccf_max.max()
+                print(best)
+                print(good)
+                print(good.ccf_max)
+                print(good.ccf_max.max())
                 continue
 
             # Save the best parameters for this temperature
