@@ -13,7 +13,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline, LinearNDIn
 import numpy as np
 import h5py
 
-from utils import FittingUtilities, DataStructures
+from kglib.utils import FittingUtilities, DataStructures
 import Broaden
 import pandas
 
@@ -712,7 +712,7 @@ class KuruczGetter():
                     You need to keep this as small as possible to avoid memory issues!
                     The whole grid would take about 36 GB of RAM!
         """
-        import HelperFunctions
+        from kglib.utils import HelperFunctions
         self.rebin = rebin
         self.debug = debug
 
@@ -950,7 +950,7 @@ class PhoenixGetter():
         other args: The minimum and maximum values for the parameters to search.
                     You need to keep this as small as possible to avoid memory issues!
         """
-        import HelperFunctions
+        from kglib.utils import HelperFunctions
         self.rebin = rebin
         self.debug = debug
 

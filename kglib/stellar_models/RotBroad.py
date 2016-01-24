@@ -3,8 +3,9 @@ import numpy as np
 from astropy import units, constants
 from scipy.interpolate import UnivariateSpline
 
-from utils import DataStructures
-from utils.FittingUtilities import Continuum as FindContinuum
+from kglib.utils import DataStructures
+from kglib.utils.FittingUtilities import Continuum as FindContinuum
+import warnings
 
 
 pi = np.pi
@@ -110,7 +111,7 @@ def Broaden(model, vsini, intervalsize=50.0, beta=1.0, linear=False, findcont=Fa
         profile = 1.0 / (zeta * (1 + 2 * beta / 3.)) * (
         2 / np.pi * np.sqrt(1 - x ** 2) + 0.5 * beta * ( 1 - x ** 2  ) )
         if profile.size < 10:
-            warning.warn("Warning! Profile size too small: %i\nNot broadening!" % (profile.size))
+            warnings.warn("Warning! Profile size too small: %i\nNot broadening!" % (profile.size))
             intervals.append(interval)
             firstindex = lastindex - 2 * profile.size
             continue
