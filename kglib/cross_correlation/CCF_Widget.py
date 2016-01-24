@@ -11,7 +11,7 @@ from bokeh.properties import String, Instance
 from bokeh.server.app import bokeh_app
 from bokeh.server.utils.plugins import object_page
 from bokeh.models.widgets import HBox, VBox, VBoxForm, Select
-from utils.HDF5_Helpers import Full_CCF_Interface
+from kglib.utils.HDF5_Helpers import Full_CCF_Interface
 
 
 logger = logging.getLogger()

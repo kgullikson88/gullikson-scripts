@@ -17,9 +17,9 @@ import pandas as pd
 from george import kernels
 import george
 import fitters
-from utils import StarData
-from utils.HelperFunctions import mad, integral
-from spectral_type import SpectralTypeRelations
+from kglib.utils import StarData
+from kglib.utils.HelperFunctions import mad, integral
+from kglib.spectral_type import SpectralTypeRelations
 
 
 def classify_filename(fname, type='bright'):

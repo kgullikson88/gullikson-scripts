@@ -1,5 +1,4 @@
 import numpy as np
-# import scipy as sp
 from scipy.ndimage import convolve
 
 # Try and use the faster Fourier transform functions from the anfft module if

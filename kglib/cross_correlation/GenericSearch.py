@@ -6,10 +6,10 @@ It is called by several smaller scripts in each of the instrument-specific repos
 
 import numpy as np
 
-from utils import FittingUtilities, DataStructures
+from kglib.utils import FittingUtilities, DataStructures
 import Correlate
-from utils import HelperFunctions
-from stellar_models import StellarModel, Broaden
+from kglib.utils import HelperFunctions
+from kglib.stellar_models import StellarModel, Broaden
 
 
 try:
@@ -21,8 +21,8 @@ from astropy.io import fits
 from astropy.time import Time
 import subprocess
 from collections import defaultdict
-from utils import StarData
-from spectral_type import SpectralTypeRelations
+from kglib.utils import StarData
+from kglib.spectral_type import SpectralTypeRelations
 from astropy import units as u
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 import re

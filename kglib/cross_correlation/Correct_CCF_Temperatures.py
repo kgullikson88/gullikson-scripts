@@ -155,7 +155,7 @@ def get_real_temperature_newmethod(df, addmode='simple'):
     :param addmode: The way the individual order CCFs were co-added
     :return:
     """
-    from utils import HDF5_Helpers
+    from kglib.utils import HDF5_Helpers
     hdf_interface = HDF5_Helpers.Full_CCF_Interface()
 
     # Group by the star name.

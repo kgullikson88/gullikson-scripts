@@ -8,9 +8,9 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.optimize import minimize_scalar
 import numpy as np
 
-from utils import FittingUtilities, DataStructures, HelperFunctions
-from stellar_models.Broaden import RotBroad
-from utils.PlotBlackbodies import Planck
+from kglib.utils import FittingUtilities, DataStructures, HelperFunctions
+from kglib.stellar_models.Broaden import RotBroad
+from kglib.utils.PlotBlackbodies import Planck
 import Normalized_Xcorr
 
 
