@@ -16,7 +16,7 @@ from scipy.optimize import fmin
 import matplotlib.pyplot as plt
 
 import pandas as pd
-from utils.HelperFunctions import ensure_dir
+from kglib.utils.HelperFunctions import ensure_dir
 
 
 try:
