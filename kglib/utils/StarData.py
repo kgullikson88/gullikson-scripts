@@ -68,7 +68,7 @@ def GetData(starname, safe_spt=False):
     try:
         Simbad.SIMBAD_URL = 'http://simbak.cfa.harvard.edu/simbad/sim-script'
         star = Simbad.query_object(starname)
-    except astroquery.exceptions.TimeoutError:
+    except:
         Simbad.SIMBAD_URL = 'http://simbad.u-strasbg.fr/simbad/sim-script'
         star = Simbad.query_object(starname)
     if star is None:
