@@ -378,6 +378,12 @@ class Bayesian_LS(object):
             PyMultiNest Analyzer object associated with fit.
             See PyMultiNest documentation for more.
             """
+            try:
+                import pymultinest
+            except ImportError:
+                print('pymultinest import failed!')
+                return {'global evidence': None, 'global evidence error': None}
+            
             return pymultinest.Analyzer(self.n_params, self._mnest_basename)
 
         @property
