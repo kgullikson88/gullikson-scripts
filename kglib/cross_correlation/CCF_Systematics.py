@@ -16,7 +16,7 @@ import h5py
 import pandas as pd
 from george import kernels
 import george
-import fitters
+from kglib import fitters
 from kglib.utils import StarData
 from kglib.utils.HelperFunctions import mad, integral
 from kglib.spectral_type import SpectralTypeRelations
