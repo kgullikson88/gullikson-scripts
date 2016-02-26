@@ -584,7 +584,7 @@ def slow_companion_search(fileList,
                     # broaden the model
                     model = modeldict[temp][gravity][metallicity][alpha][vsini_sec].copy()
                     l_idx = 0 if min_x is None else np.searchsorted(model.x, min_x)
-                    r_idx = model.size() if max_x is None else np.searchsorted(model.x, max_x)
+                    r_idx = model.size() if max_x is None else np.searchsorted(model.x, max_x)+1
                     model = Broaden.RotBroad(model[l_idx:r_idx], vsini_sec * u.km.to(u.cm), linear=True)
                     if resolution is not None:
                         model = FittingUtilities.ReduceResolutionFFT(model, resolution)
