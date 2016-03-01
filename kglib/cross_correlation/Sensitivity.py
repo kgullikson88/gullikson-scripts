@@ -780,7 +780,7 @@ def summarize_sensitivity(sens_df):
     :return: A pandas dataframe with the summary
     """
     cols = ['star', 'date', '[Fe/H]', 'logg', 'addmode', 'temperature', 'vsini']
-    detrate = sens_df.groupby(cols).apply(lambda d: d.significance.notnull().sum() / float(len(d)))
+    detrate = sens_df.groupby(cols).apply(lambda d: (d.significance > 5).sum() / float(len(d)))
     detrate = detrate.reset_index().rename(columns={0: 'detrate'})
     significance = sens_df.groupby(cols).apply(lambda d: np.nanmean(d.significance))
     significance = significance.reset_index().rename(columns={0: 'significance'})
