@@ -725,20 +725,20 @@ def read_hdf5(hdf5_file):
     hdf5_int = HDF5_Interface(hdf5_file)
     df = hdf5_int.to_df()
 
-    # Get the luminosity ratio
-    logging.info('Estimating the luminosity ratio for each trial')
-    df['lum_ratio'] = df.apply(get_luminosity_ratio, axis=1)
-    df['logL'] = np.log10(df.lum_ratio)
 
     # Get the contrast. Split by group and then merge to limit the amount of calculation needed
     logging.info('Estimating the V-band contrast ratio for each trial')
     keys = [u'primary temps', u'temperature']
     test_vsini = df.vsini.unique()[0]
     temp = df.loc[(df.rv == 0) & (df.vsini == test_vsini)].drop_duplicates(subset=['star', 'temperature'])
-    # temp = df.groupby(('star')).apply(lambda df: df.loc[(df.rv == 0) & (df.vsini == test_vsini)][keys]).reset_index()
-    # logging.debug(temp[['star', 'primary_temps', 'temperature']])
     temp['contrast'] = temp.apply(lambda r: get_contrast(r, band='V'), axis=1)
-    df = pd.merge(df, temp[['star', 'temperature', 'contrast']], on=['star', 'temperature'], how='left')
+
+    logging.info('Estimating the luminosity ratio for each trial')
+    temp['lum_ratio'] = temp.apply(get_luminosity_ratio, axis=1)
+
+    logging.info('Re-merging dataframe')
+    df = pd.merge(df, temp[['star', 'temperature', 'contrast', 'lum_ratio']], on=['star', 'temperature'], how='left')
+    df['logL'] = np.log10(df.lum_ratio)
 
     return df
 
