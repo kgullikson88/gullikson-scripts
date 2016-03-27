@@ -226,10 +226,15 @@ class Full_CCF_Interface(object):
                            'HET': '{}/School/Research/HET_data/Cross_correlations/CCF.hdf5'.format(home),
                            'CHIRON': '{}/School/Research/CHIRON_data/Cross_correlations/CCF.hdf5'.format(home),
                            'IGRINS': '{}/School/Research/IGRINS_data/Cross_correlations/CCF.hdf5'.format(home)}
-        #self._ccf_files = {'TS23': '{}/School/Research/McDonaldData/Cross_correlations/CCF_primary_20151129.hdf5'.format(home),
-        #                   'HET': '{}/School/Research/HET_data/Cross_correlations/CCF_primary_20151129.hdf5'.format(home),
-        #                   'CHIRON': '{}/School/Research/CHIRON_data/Cross_correlations/CCF_primary_20151129.hdf5'.format(home),
-        #                   'IGRINS': '{}/School/Research/IGRINS_data/Cross_correlations/CCF_primary_20151129.hdf5'.format(home)}
+        #self._ccf_files = {'TS23': '{}/School/Research/McDonaldData/Cross_correlations/CCF_Kurucz.hdf5'.format(home),
+        #                   'HET': '{}/School/Research/HET_data/Cross_correlations/CCF_Kurucz.hdf5'.format(home),
+        #                   'CHIRON': '{}/School/Research/CHIRON_data/Cross_correlations/CCF_Kurucz.hdf5'.format(home),
+        #                   'IGRINS': '{}/School/Research/IGRINS_data/Cross_correlations/CCF_Kurucz.hdf5'.format(home)}
+        #self._ccf_files = {'TS23': '{}/School/Research/McDonaldData/Cross_correlations/CCF_HIP16147.hdf5'.format(home)}
+        #self._ccf_files = {'TS23': '{}/School/Research/McDonaldData/Cross_correlations/CCF_primary_total.hdf5'.format(home),
+        #                   'HET': '{}/School/Research/HET_data/Cross_correlations/CCF_primary_total.hdf5'.format(home),
+        #                   'CHIRON': '{}/School/Research/CHIRON_data/Cross_correlations/CCF_primary_total.hdf5'.format(home),
+        #                   'IGRINS': '{}/School/Research/IGRINS_data/Cross_correlations/CCF_primary_total.hdf5'.format(home)}
         #self._ccf_files = {'CHIRON': '{}/School/Research/CHIRON_data/Adam_Data/Cross_correlations/CCF.hdf5'.format(home)}
         self._interfaces = {inst: Analyze_CCF.CCF_Interface(self._ccf_files[inst]) for inst in self._ccf_files.keys()}
 
@@ -557,3 +562,78 @@ class Full_CCF_Interface(object):
 
         return corrected
 
+
+
+
+
+class Kurucz_CCF_Interface(Full_CCF_Interface):
+    """ Same thing as above, but uses different CCF files """
+    def __init__(self, cache=False, update_cache=True, **cache_kwargs):
+        # Instance variables to hold the ccf interfaces
+        self._ccf_files = {'TS23': '{}/School/Research/McDonaldData/Cross_correlations/CCF_Kurucz.hdf5'.format(home),
+                           'HET': '{}/School/Research/HET_data/Cross_correlations/CCF_Kurucz.hdf5'.format(home),
+                           'CHIRON': '{}/School/Research/CHIRON_data/Cross_correlations/CCF_Kurucz.hdf5'.format(home),
+                           'IGRINS': '{}/School/Research/IGRINS_data/Cross_correlations/CCF_Kurucz.hdf5'.format(home)}
+        
+        self._interfaces = {inst: Analyze_CCF.CCF_Interface(self._ccf_files[inst]) for inst in self._ccf_files.keys()}
+
+        # Variables for correcting measured --> actual temperatures
+        self._caldir = {'TS23': '{}/School/Research/McDonaldData/SyntheticData/'.format(home),
+                       'HET': '{}/School/Research/HET_data/SyntheticData/'.format(home),
+                       'CHIRON': '{}/School/Research/CHIRON_data/SyntheticData/'.format(home),
+                       'IGRINS': '{}/School/Research/IGRINS_data/SyntheticData/'.format(home)}
+        self._fitters = {'TS23': fitters.Bayesian_LS,
+                         'HET': fitters.Bayesian_LS,
+                         'CHIRON': fitters.Bayesian_LS,
+                         'IGRINS': fitters.Bayesian_LS}
+        self._flatchain_format = '{directory}{instrument}_{addmode}_flatchain.npy'
+        self._flatlnprob_format = '{directory}{instrument}_{addmode}_flatlnprob.npy'
+        self._uncertainty_scale = '{directory}{instrument}_{addmode}uncertainty_scalefactor.txt'
+
+        # Make a couple data caches to speed things up
+        self._chainCache = {}
+        self._predictionCache = {}
+
+        self._cache = None
+        if cache:
+            self._make_cache(update_cache=update_cache, **cache_kwargs)
+
+        return
+
+
+
+class Primary_CCF_Interface(Full_CCF_Interface):
+    """
+    Same as above, but for the primary star ccfs.
+    """
+
+    def __init__(self, cache=False, update_cache=True, **cache_kwargs):
+        # Instance variables to hold the ccf interfaces
+        self._ccf_files = {'TS23': '{}/School/Research/McDonaldData/Cross_correlations/CCF_primary_total.hdf5'.format(home),
+                           'HET': '{}/School/Research/HET_data/Cross_correlations/CCF_primary_total.hdf5'.format(home),
+                           'CHIRON': '{}/School/Research/CHIRON_data/Cross_correlations/CCF_primary_total.hdf5'.format(home),
+                           'IGRINS': '{}/School/Research/IGRINS_data/Cross_correlations/CCF_primary_total.hdf5'.format(home)}
+        self._interfaces = {inst: Analyze_CCF.CCF_Interface(self._ccf_files[inst]) for inst in self._ccf_files.keys()}
+
+        # Variables for correcting measured --> actual temperatures
+        self._caldir = {'TS23': '{}/School/Research/McDonaldData/SyntheticData/'.format(home),
+                       'HET': '{}/School/Research/HET_data/SyntheticData/'.format(home),
+                       'CHIRON': '{}/School/Research/CHIRON_data/SyntheticData/'.format(home),
+                       'IGRINS': '{}/School/Research/IGRINS_data/SyntheticData/'.format(home)}
+        self._fitters = {'TS23': fitters.Bayesian_LS,
+                         'HET': fitters.Bayesian_LS,
+                         'CHIRON': fitters.Bayesian_LS,
+                         'IGRINS': fitters.Bayesian_LS}
+        self._flatchain_format = '{directory}{instrument}_{addmode}_flatchain.npy'
+        self._flatlnprob_format = '{directory}{instrument}_{addmode}_flatlnprob.npy'
+        self._uncertainty_scale = '{directory}{instrument}_{addmode}uncertainty_scalefactor.txt'
+
+        # Make a couple data caches to speed things up
+        self._chainCache = {}
+        self._predictionCache = {}
+
+        self._cache = None
+        if cache:
+            self._make_cache(update_cache=update_cache, **cache_kwargs)
+
+        return

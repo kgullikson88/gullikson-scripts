@@ -11,7 +11,7 @@ from bokeh.properties import String, Instance
 from bokeh.server.app import bokeh_app
 from bokeh.server.utils.plugins import object_page
 from bokeh.models.widgets import HBox, VBox, VBoxForm, Select
-from kglib.utils.HDF5_Helpers import Full_CCF_Interface
+from kglib.utils.HDF5_Helpers import Full_CCF_Interface, Kurucz_CCF_Interface, Primary_CCF_Interface
 
 
 logger = logging.getLogger()
@@ -44,7 +44,10 @@ class CCF_App(VBox):
     inst_date_select = Instance(Select)
     input_box = Instance(VBoxForm)
 
-    _ccf_interface = Full_CCF_Interface(cache=True, update_cache=False)
+    #_ccf_interface = Kurucz_CCF_Interface(cache=False, update_cache=False)
+    #_ccf_interface = Primary_CCF_Interface(cache=False, update_cache=False)
+    _ccf_interface = Full_CCF_Interface(cache=False, update_cache=False)
+    #                                    cache_fname='/home/kgullikson/.PythonModules/CCF_metadata.csv')
     _df_cache = {}
 
 
