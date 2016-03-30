@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import sys
 import os
 import logging
@@ -9,7 +11,7 @@ from astroquery.simbad import Simbad
 import astroquery
 import pandas as pd
 from kglib import stellar_data
-from HelperFunctions import convert_to_hex
+from .HelperFunctions import convert_to_hex
 
 
 
@@ -35,7 +37,7 @@ class stardata:
 
 def GetData(starname, safe_spt=False):
     """
-    Search simbad for information about the given star. 
+    Search simbad for information about the given star.
     :param starname: A simbad-queryable name for the star
     :param safe_spt: If True, convert spectral types with 'm' in them to '5': eg. 'Am' --> 'A5'
     """
@@ -59,7 +61,7 @@ def GetData(starname, safe_spt=False):
         data.ra = convert_to_hex(star.RA, delimiter=':')
         data.dec = convert_to_hex(star.DEC, delimiter=':', force_sign=True)
         data.par = star.parallax
-        data_cache[starname] = data 
+        data_cache[starname] = data
 
         return data
 
@@ -122,14 +124,5 @@ def get_vsini(file_list, vsini_filename=VSINI_FILE):
             except IndexError:
                 logging.warn('No vsini found for star {}! No primary star removal will be attempted!'.format(star))
                 prim_vsini.append(None)
-    for fname, vsini in zip(file_list, prim_vsini):
-        print fname, vsini
+
     return prim_vsini
-
-
-if __name__ == "__main__":
-    for starname in sys.argv[1:]:
-        data = GetData(starname)
-        print starname, data.spectype
-    
-    

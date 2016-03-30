@@ -1,3 +1,5 @@
+from __future__ import print_function, absolute_import
+
 from collections import defaultdict
 import re
 import logging
@@ -388,7 +390,7 @@ class MainSequence:
         elif SpectralClass == "Y":
             return basenum + 90
         else:
-            print "Something weird happened! Spectral type = ", SpT
+            print( "Something weird happened! Spectral type = ", SpT)
             return -1
 
     def Number_To_SpT(self, number):
@@ -603,16 +605,3 @@ class MainSequence:
             slope = 0.1 / (bestvalue - secondvalue)
             num2 = slope * (bestvalue - value) + num
             return self.Number_To_SpT(num2)
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    

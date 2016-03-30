@@ -4,7 +4,7 @@
       Cython code, which needs to be compiled!
 
 
-    
+
     This file is part of the TelFit program.
 
     TelFit is free software: you can redistribute it and/or modify
@@ -17,6 +17,7 @@
     You should have received a copy of the MIT license
     along with TelFit.  If not, see <http://opensource.org/licenses/MIT>.
 """
+from __future__ import print_function, absolute_import
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.interpolate import UnivariateSpline as smoother
@@ -25,7 +26,7 @@ import matplotlib.pyplot as plt
 from pysynphot.observation import Observation
 from pysynphot.spectrum import ArraySourceSpectrum, ArraySpectralElement
 
-import DataStructures
+from kglib.utils import DataStructures
 
 
 cimport numpy as np
@@ -84,14 +85,14 @@ def CCImprove(data, model, be_safe=True, tol=0.2, debug=False):
     right = np.searchsorted(offsets, tol)
   else:
     left, right = 0, ycorr.size
-    
+
   maxindex = ycorr[left:right].argmax() + left
 
   if debug:
     return offsets[maxindex], DataStructures.xypoint(x=offsets, y=ycorr)
   else:
     return offsets[maxindex]
- 
+
 
 def Continuum(x, y, fitorder=3, lowreject=2, highreject=4, numiter=10000, function="poly"):
   """
@@ -203,7 +204,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
 
 def Iterative_SV(y, window_size, order, lowreject=3, highreject=3, numiters=100, expand=0, deriv=0, rate=1):
   """
-  Iterative version of the savitzky-golay smoothing function. 
+  Iterative version of the savitzky-golay smoothing function.
   See the documentation for savitzky_golay for details
   """
   done = False
@@ -212,13 +213,13 @@ def Iterative_SV(y, window_size, order, lowreject=3, highreject=3, numiters=100,
     iteration += 1
     done = True
     smoothed = savitzky_golay(y, window_size, order, deriv, rate)
-      
+
     reduced = y/smoothed
     sigma = np.std(reduced)
     mean = np.mean(reduced)
     badindices = np.where(np.logical_or((reduced - mean)/sigma < -lowreject, (reduced - mean)/sigma > highreject))[0]
-    
-    # Now, expand the outliers by 'expand' pixels on either 
+
+    # Now, expand the outliers by 'expand' pixels on either
     exclude  = []
     for outlier in badindices:
       for i in range(max(0, outlier - expand), min(outlier+expand+1, reduced.size)):
@@ -241,10 +242,10 @@ def FindLines(spectrum, tol=0.99, linespacing = 0.01, debug=False):
   """
   Function to find the spectral lines, given a model spectrum
   spectrum:        An xypoint instance with the model (Must be linearly spaced!)
-  tol:             The line strength needed to count the line 
+  tol:             The line strength needed to count the line
                       (0 is a strong line, 1 is weak)
-  linespacing:     The minimum spacing (nm) between two consecutive lines. 
-                      FindLines will choose the strongest line if there are 
+  linespacing:     The minimum spacing (nm) between two consecutive lines.
+                      FindLines will choose the strongest line if there are
                       several too close.
   """
   #First, convert the inputs into inputs for scipy's argrelmin
@@ -261,7 +262,7 @@ def FindLines(spectrum, tol=0.99, linespacing = 0.01, debug=False):
       lines.pop(i)
     elif debug:
       plt.plot([xval, xval], [yval-0.01, yval-0.03], 'r-')
-      
+
   if debug:
       plt.plot(spectrum.x, spectrum.y / spectrum.cont, 'k-')
       plt.title("Lines found in FittingUtilities.FindLines")
@@ -272,8 +273,8 @@ def FindLines(spectrum, tol=0.99, linespacing = 0.01, debug=False):
 
 
 
-  
-  
+
+
 
 def RebinData(data, xgrid, synphot=True):
   """
@@ -281,7 +282,7 @@ def RebinData(data, xgrid, synphot=True):
     It is designed to rebin to a courser wavelength grid, but can also
     interpolate to a finer grid.
   if synphot=True, it uses pySynphot for the rebinning, which conserves flux
-    Otherwise, it just interpolates the data and continuum which is faster 
+    Otherwise, it just interpolates the data and continuum which is faster
     but could cause problems.
   """
   if synphot:
@@ -295,7 +296,7 @@ def RebinData(data, xgrid, synphot=True):
     newdata.y = rebin_spec(data.x, data.y, xgrid)
     newdata.cont = rebin_spec(data.x, data.cont, xgrid)
     newdata.err = rebin_spec(data.x, data.err, xgrid) #Unlikely to be correct!
-    
+
     #pysynphot has edge effect issues on the first and last index.
     firstindex = np.argmin(np.abs(data.x - xgrid[0]))
     lastindex = np.argmin(np.abs(data.x - xgrid[-1]))
@@ -312,7 +313,7 @@ def RebinData(data, xgrid, synphot=True):
     newdata.err *= yunits
     newdata.cont *= yunits
     return newdata
-  
+
   else:
     data_spacing = data.x[1] - data.x[0]
     grid_spacing = xgrid[1] - xgrid[0]
@@ -334,7 +335,7 @@ def RebinData(data, xgrid, synphot=True):
         left = right
       right = np.searchsorted(data.x, (3*xgrid[-1]-xgrid[-2])/2.0)
       newdata.y[xgrid.size-1] = np.mean(data.y[left:right])
-  
+
     return newdata
 
 
@@ -348,7 +349,7 @@ def rebin_spec(wave, specin, wavnew):
   f = np.ones(len(wave))
   filt = ArraySpectralElement(wave, f)
   obs = Observation(spec, filt, binset=wavnew, force='taper')
-  
+
   return obs.binflux
 
 
@@ -363,7 +364,7 @@ def ReduceResolution(data,resolution, extend=True):
 
   WARNING! If the wavelength range is very large, it will give incorrect
     results because it uses a single Gaussian kernel for the whole range.
-    This works just fine for small wavelength ranges such as in CRIRES, 
+    This works just fine for small wavelength ranges such as in CRIRES,
     or with echelle spectra. If you have a large wavelength range, use
     ReduceResolution2!!
   """
@@ -379,15 +380,15 @@ def ReduceResolution(data,resolution, extend=True):
 
   #Extend the xy axes to avoid edge-effects, if desired
   if extend:
-    
+
     before = data.y[-gaussian.size/2+1:]
     after = data.y[:gaussian.size/2]
     extended = np.r_[before, data.y, after]
 
     first = data.x[0] - float(int(gaussian.size/2.0+0.5))*xspacing
     last = data.x[-1] + float(int(gaussian.size/2.0+0.5))*xspacing
-    x2 = np.linspace(first, last, extended.size) 
-    
+    x2 = np.linspace(first, last, extended.size)
+
     conv_mode = "valid"
 
   else:
@@ -397,12 +398,12 @@ def ReduceResolution(data,resolution, extend=True):
 
   newdata = data.copy()
   newdata.y = fftconvolve(extended, gaussian/gaussian.sum(), mode=conv_mode)
-    
+
   return newdata
 
 
 """
-  The following is np code to quickly convolve a spectrum 
+  The following is np code to quickly convolve a spectrum
     for ReduceResolution2. DO NOT CALL THIS DIRECTLY!
 """
 @cython.boundscheck(False)
@@ -410,20 +411,20 @@ def ReduceResolution(data,resolution, extend=True):
 cdef np.ndarray[DTYPE_t, ndim=1] convolve(np.ndarray[DTYPE_t, ndim=1] x,
                                              np.ndarray[DTYPE_t, ndim=1] y,
                                              np.ndarray[DTYPE_t, ndim=1] output,
-                                             
+
                                              double R,
                                              double nsig):
   cdef int i, n, start, end, length
   cdef double dx, sigma, total, conv, g, x0
   cdef np.ndarray[DTYPE_t, ndim=1] sig
-  
+
   dx = x[1] - x[0]    #Assumes constant x-spacing!
-  
+
   #Determine the edges
   sig = x/(2.0*R*sqrt(2.0*log(2.0)))
   n1 = np.searchsorted((x-x[0])/sig, nsig)
   n2 = np.searchsorted((x-x[x.size-1])/sig, -nsig)
-  
+
   #Convolution outer loop
   for n in range(n1, n2):
     sigma = sig[n]
@@ -431,7 +432,7 @@ cdef np.ndarray[DTYPE_t, ndim=1] convolve(np.ndarray[DTYPE_t, ndim=1] x,
     x0 = x[n]
     total = 0.0
     conv = 0.0
-    
+
     #Inner loop
     for i in range(-length, length+1):
       g = exp(-(x[n+i]-x0)**2 / (2.0*sigma**2))
@@ -440,12 +441,12 @@ cdef np.ndarray[DTYPE_t, ndim=1] convolve(np.ndarray[DTYPE_t, ndim=1] x,
     output[n] = conv/total
   return output
 
-  
+
 
 
 def ReduceResolution2(data,resolution, extend=True, nsig=5):
   """
-  This is a more accurate version of ReduceResolution. 
+  This is a more accurate version of ReduceResolution.
     It is also a bit slower, so don't use if you don't
     have to!
   """
@@ -454,7 +455,7 @@ def ReduceResolution2(data,resolution, extend=True, nsig=5):
   dx = data.x[1] - data.x[0]
   n1 = int(sig1*(nsig+1)/dx + 0.5)
   n2 = int(sig2*(nsig+1)/dx + 0.5)
-  
+
   if extend:
     #Extend array to try to remove edge effects (do so circularly)
     before = data.y[-n1:]
@@ -467,21 +468,21 @@ def ReduceResolution2(data,resolution, extend=True, nsig=5):
     x2 = np.linspace(first, last, extended.size)
     convolved = np.ones(extended.size)
     convolved = convolve(x2, extended, convolved, resolution, nsig)
-    convolved = convolved[n1:convolved.size-n2] 
+    convolved = convolved[n1:convolved.size-n2]
 
   else:
     extended = data.y.copy()
     x2 = data.x.copy()
     convolved = np.ones(extended.size)
     convolved = convolve(x2, extended, convolved, resolution, nsig)
-    
+
 
   newdata = data.copy()
   newdata.y = convolved
-  return newdata 
-  
-    
-  
+  return newdata
+
+
+
 def ReduceResolutionFFT(data, resolution, extend=True, loglinear=True, nsig=5):
     """
     Uses an fft to quickly reduce the resolution of a spectrum to the desired value
@@ -527,9 +528,9 @@ def ReduceResolutionFFT(data, resolution, extend=True, loglinear=True, nsig=5):
 
 
 
-  
 
-  
+
+
 
 
 def ReduceResolutionAndRebinData(data,resolution,xgrid):
@@ -538,5 +539,3 @@ def ReduceResolutionAndRebinData(data,resolution,xgrid):
   """
   data = ReduceResolution(data,resolution)
   return RebinData(data,xgrid)
-
-

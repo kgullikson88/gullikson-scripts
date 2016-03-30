@@ -37,6 +37,7 @@ History:
 Created by Rick White based on my IDL readechelle.pro, 2012 August 15
 Apologies for any IDL-isms that remain!
 """
+from __future__ import print_function, absolute_import
 
 import numpy as np
 from astropy.io import fits as pyfits
@@ -44,7 +45,7 @@ from astropy.io import fits as pyfits
 
 def nonlinearwave(nwave, specstr, verbose=False):
     """Compute non-linear wavelengths from multispec string
-    
+
     Returns wavelength array and dispersion fields.
     Raises a ValueError if it can't understand the dispersion string.
     """
@@ -67,7 +68,7 @@ def nonlinearwave(nwave, specstr, verbose=False):
         pmin = float(fields[13])
         pmax = float(fields[14])
         if verbose:
-            print 'Dispersion is order-%d cubic spline' % npieces
+            print( 'Dispersion is order-%d cubic spline' % npieces)
         if len(fields) != 15 + npieces + 3:
             raise ValueError('Bad order-%d spline format (%d fields)' % (npieces, len(fields)))
         coeff = np.asarray(fields[15:], dtype=float)
@@ -94,14 +95,14 @@ def nonlinearwave(nwave, specstr, verbose=False):
         pmax = float(fields[14])
         if verbose:
             if ftype == 1:
-                print 'Dispersion is order-%d Chebyshev polynomial' % order
+                print( 'Dispersion is order-%d Chebyshev polynomial' % order)
             else:
-                print 'Dispersion is order-%d Legendre polynomial (NEEDS TEST)' % order
+                print( 'Dispersion is order-%d Legendre polynomial (NEEDS TEST)' % order)
         if len(fields) != 15 + order:
             # raise ValueError('Bad order-%d polynomial format (%d fields)' % (order, len(fields)))
             if verbose:
-                print 'Bad order-%d polynomial format (%d fields)' % (order, len(fields))
-                print "Changing order from %i to %i" % (order, len(fields) - 15)
+                print( 'Bad order-%d polynomial format (%d fields)' % (order, len(fields)))
+                print( "Changing order from %i to %i" % (order, len(fields) - 15))
             order = len(fields) - 15
         coeff = np.asarray(fields[15:], dtype=float)
         # normalized x coordinates
@@ -130,10 +131,10 @@ def nonlinearwave(nwave, specstr, verbose=False):
 
 def readmultispec(fitsfile, reform=True, quiet=False):
     """Read IRAF echelle spectrum in multispec format from a FITS file
-    
+
     Can read most multispec formats including linear, log, cubic spline,
     Chebyshev or Legendre dispersion spectra
-    
+
     If reform is true, a single spectrum dimensioned 4,1,NWAVE is returned
     as 4,NWAVE (this is the default.)  If reform is false, it is returned as
     a 3-D array.
@@ -168,10 +169,10 @@ def readmultispec(fitsfile, reform=True, quiet=False):
             if dcflag == 1:
                 wavelen = 10.0 ** wavelen
                 if not quiet:
-                    print 'Dispersion is linear in log wavelength'
+                    print( 'Dispersion is linear in log wavelength')
             elif dcflag == 0:
                 if not quiet:
-                    print 'Dispersion is linear'
+                    print( 'Dispersion is linear')
             else:
                 raise ValueError('Dispersion not linear or log (DC-FLAG=%s)' % dcflag)
 
@@ -236,16 +237,16 @@ def readmultispec(fitsfile, reform=True, quiet=False):
             if wparms[i, 2] == 1:
                 wavelen[i, :] = 10.0 ** wavelen[i, :]
                 if verbose:
-                    print 'Dispersion is linear in log wavelength'
+                    print( 'Dispersion is linear in log wavelength')
             elif verbose:
-                print 'Dispersion is linear'
+                print( 'Dispersion is linear')
         else:
             # non-linear wavelengths
             wavelen[i, :], wavefields[i] = nonlinearwave(nwave, specstr[i],
                                                          verbose=verbose)
         wavelen *= 1.0 + wparms[i, 6]
         if verbose:
-            print "Correcting for redshift: z=%f" % wparms[i, 6]
+            print( "Correcting for redshift: z=%f" % wparms[i, 6])
     if nspec == 1 and reform:
         # get rid of unity dimensions
         flux = np.squeeze(flux)

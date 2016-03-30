@@ -2,6 +2,8 @@
     Just a set of helper functions that I use often
     VERY miscellaneous!
 """
+from __future__ import print_function, absolute_import
+
 import os
 import csv
 from collections import defaultdict
@@ -18,23 +20,23 @@ from astropy.time import Time
 
 from statsmodels.stats.proportion import proportion_confint
 import pandas as pd
-import DataStructures
+from kglib.utils import DataStructures
 from kglib.spectral_type import SpectralTypeRelations
-import readmultispec as multispec
+from kglib.utils import readmultispec as multispec
 
 
 try:
     import emcee
     emcee_import = True
 except ImportError:
-    print "Warning! emcee module not loaded! BayesFit Module will not be available!"
+    print("Warning! emcee module not loaded! BayesFit Module will not be available!")
     emcee_import = False
-import FittingUtilities
+from kglib.utils import FittingUtilities
 try:
     import mlpy
     mlpy_import = True
 except ImportError:
-    print "Warning! mlpy not loaded! Denoise will not be available"
+    print( "Warning! mlpy not loaded! Denoise will not be available")
     mlpy_import = False
 import warnings
 
@@ -48,7 +50,7 @@ def ensure_dir(f):
         d = f
     if not os.path.exists(d):
         os.makedirs(d)
-        
+
 
 def SmoothData(order, windowsize=91, smoothorder=5, lowreject=3, highreject=3, numiters=10, expand=0, normalize=True):
     denoised = Denoise(order.copy())
@@ -100,7 +102,7 @@ def CheckMultiplicityWDS(starname):
     elif isinstance(starname, sim.simbad):
         star = starname
     else:
-        print "Error! Unrecognized variable type in HelperFunctions.CheckMultiplicity!"
+        print( "Error! Unrecognized variable type in HelperFunctions.CheckMultiplicity!")
         return False
 
     all_names = star.names()
@@ -116,7 +118,7 @@ def CheckMultiplicityWDS(starname):
     # Get absolute magnitude of the primary star, so that we can determine
     # the temperature of the secondary star from the magnitude difference
     MS = SpectralTypeRelations.MainSequence()
-    print star.SpectralType()[:2]
+    print( star.SpectralType()[:2])
     p_Mag = MS.GetAbsoluteMagnitude(star.SpectralType()[:2], 'V')
 
 
@@ -241,9 +243,9 @@ def BinomialErrors_old(nobs, Nsamp, alpha=0.16):
 
     P(nobs/Nsamp < mle; theta = c) = alpha
 
-    where theta is the success probability for each trial. 
+    where theta is the success probability for each trial.
 
-    Code stolen shamelessly from stackoverflow: 
+    Code stolen shamelessly from stackoverflow:
     http://stackoverflow.com/questions/13059011/is-there-any-python-function-library-for-calculate-binomial-confidence-intervals
     """
     from scipy.stats import binom
@@ -261,7 +263,7 @@ def BinomialErrors(nobs, Nsamp, alpha=0.05, method='jeffrey'):
     """
 
     low, high = proportion_confint(nobs, Nsamp, method=method, alpha=alpha)
-    
+
     if nobs == 0:
         low = 0.0
         p = 0.0
@@ -313,7 +315,7 @@ def ReadFits(datafile, errors=False, extensions=False, x=None, y=None, cont=None
     See ReadExtensionFits for a convenience function that assumes my standard names
     """
     if debug:
-        print "Reading in file %s: " % datafile
+        print( "Reading in file %s: " % datafile)
 
     if extensions:
         # This means the data is in fits extensions, with one order per extension
@@ -382,7 +384,7 @@ def ReadFits(datafile, errors=False, extensions=False, x=None, y=None, cont=None
                         # wave_factor = u.nm/u.angstrom
                         wave_factor = u.angstrom.to(u.nm)
                         if debug:
-                            print "Wavelength units are Angstroms. Scaling wavelength by ", wave_factor
+                            print( "Wavelength units are Angstroms. Scaling wavelength by ", wave_factor)
 
         if errors == False:
             numorders = retdict['flux'].shape[0]
@@ -862,9 +864,9 @@ def radec2altaz(ra, dec, obstime, lat=None, long=None, debug=False):
         az = 2.0 * np.pi - az
 
     if debug:
-        print "UT: ", ut
-        print "LST: ", lst
-        print "HA: ", HA * 180.0 / np.pi
+        print( "UT: ", ut)
+        print( "LST: ", lst)
+        print( "HA: ", HA * 180.0 / np.pi)
 
     return alt * 180.0 / np.pi, az * 180.0 / np.pi
 
@@ -905,7 +907,7 @@ def convert_to_hex(val, delimiter=':', force_sign=False, debug=False):
         deg_str = '-00'
         return '-00{2:s}{0:02d}{2:s}{1:.2f}'.format(minute, second, delimiter)
     elif force_sign or s_factor < 0:
-        deg_str = '{:+03d}'.format(degree * s_factor)    
+        deg_str = '{:+03d}'.format(degree * s_factor)
     else:
         deg_str = '{:02d}'.format(degree * s_factor)
     return '{0:s}{3:s}{1:02d}{3:s}{2:.2f}'.format(deg_str, minute, second, delimiter)
@@ -933,7 +935,7 @@ def GetZenithDistance(header=None, date=None, ut=None, ra=None, dec=None, lat=No
         dec = convert_hex_string(header['dec'], delimiter=delimiter)
 
     if debug:
-        print ra, dec
+        print( ra, dec)
     alt, az = radec2altaz(ra, dec, obstime, debug=debug)
     return 90.0 - alt
 
@@ -1124,7 +1126,7 @@ def is_close(num1, num2, inf_true=True, both_inf=False):
 
 class ExtrapolatingUnivariateSpline(spline):
     """
-    Does the same thing as InterpolatedUnivariateSpline, but keeps track of if it is 
+    Does the same thing as InterpolatedUnivariateSpline, but keeps track of if it is
     extrapolating
     """
     def __init__(self, x, y, w=None, bbox=[None]*2, k=3, ext=0, fill_value=np.nan):
@@ -1176,7 +1178,7 @@ def CombineXYpoints(xypts, snr=None, xspacing=None, numpoints=None, interp_order
       xypoint. Useful for combining several orders/chips
       or for coadding spectra
 
-    Warning! This function is basically un-tested! 
+    Warning! This function is basically un-tested!
 
       ***Optional keywords***
       snr: the spectra will be weighted by the signal-to-noise ratio
@@ -1244,4 +1246,3 @@ def weighted_mean_and_stddev(arr, weights=None, bad_value=np.nan):
 
         return avg, np.sqrt(var / (1 - V2 / V1 ** 2)) + np.nansum(1.0 / np.sqrt(weights))
     return avg, 1.0 / np.sqrt(weights[0])
-
