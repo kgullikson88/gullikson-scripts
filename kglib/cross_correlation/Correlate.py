@@ -1,86 +1,48 @@
 import sys
-import os
 import warnings
 import logging
-
 from astropy import units, constants
+
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 from scipy.optimize import minimize_scalar
 import numpy as np
 
-from kglib.utils import FittingUtilities, DataStructures, HelperFunctions
+from kglib.utils import FittingUtilities, DataStructures
 from kglib.stellar_models.Broaden import RotBroad
 from kglib.utils.PlotBlackbodies import Planck
 import Normalized_Xcorr
 
 
-currentdir = os.getcwd() + "/"
-homedir = os.environ["HOME"]
-outfiledir = currentdir + "Cross_correlations/"
-modeldir = homedir + "/School/Research/Models/Sorted/Stellar/Vband/"
 minvel = -1000  # Minimum velocity to output, in km/s
 maxvel = 1000
 
-HelperFunctions.ensure_dir(outfiledir)
 
-model_list = [modeldir + "lte30-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte31-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte32-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte33-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte34-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte35-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte36-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte37-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte38-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte39-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte40-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte42-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte43-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte44-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte45-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte46-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte47-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte48-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte49-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte50-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte51-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte52-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte53-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte54-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte55-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte56-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte57-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte58-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte59-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte61-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte63-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte64-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte65-4.00-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte67-4.50-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte68-4.50-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte69-4.50-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte70-4.50-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted",
-              modeldir + "lte72-4.50-0.0.AGS.Cond.PHOENIX-ACES-2009.HighRes.7.sorted"]
+def Process(model, data, vsini, resolution, debug=False):
+    """
+    Process the model to prepare for cross-correlation.
 
-star_list = []
-temp_list = []
-gravity_list = []
-metallicity_list = []
-for fname in model_list:
-    temp = int(fname.split("lte")[-1][:2]) * 100
-    gravity = float(fname.split("lte")[-1][3:7])
-    metallicity = float(fname.split("lte")[-1][7:11])
-    star_list.append(str(temp))
-    temp_list.append(temp)
-    gravity_list.append(gravity)
-    metallicity_list.append(metallicity)
+    Parameters:
+    ===========
+    - data:          list of kglib.utils.DataStructures.xypoint instances
+                     The data we are cross-correlating against. Each element in the list
+                     is treated like an echelle order.
 
-"""
-  This function just processes the model to prepare for cross-correlation
-"""
+    - vsini:         float
+                     The rotational velocity for the model template, in km/s
+
+    - resolution:    float
+                     The detector resolution. The model is convolved with a gaussian of appropriate width to get
+                     to this resolution.
 
 
-def Process(model, data, vsini, resolution, debug=False, oversample=1, get_weights=False, prim_teff=10000.0):
+    - debug:         boolean
+                     Print a bit more information and output the broadened model to './Test_model.dat'
+
+    Returns:
+    =========
+    - model_orders:  list of kglib.utils.DataStructures.xypoint instances
+                     The broadened models, resampled to the same spacing as the data and ready for cross-correlation.
+    """
     # Read in the model if necessary
     if isinstance(model, str):
         logging.debug("Reading in the input model from {0:s}".format(model))
@@ -115,8 +77,6 @@ def Process(model, data, vsini, resolution, debug=False, oversample=1, get_weigh
 
     # Rebin subsets of the model to the same spacing as the data
     model_orders = []
-    weights = []
-    flux_ratio = []
     if debug:
         model.output("Test_model.dat")
 
@@ -142,53 +102,79 @@ def Process(model, data, vsini, resolution, debug=False, oversample=1, get_weigh
         segment.cont = FittingUtilities.Continuum(segment.x, segment.y, lowreject=1.5, highreject=5, fitorder=2)
         model_orders.append(segment)
 
-        # Measure the information content in the model, if get_weights is true
-        # if get_weights:
-        # slopes = [(segment.y[i + 1] / segment.cont[i + 1] - segment.y[i - 1] / segment.cont[i - 1]) /
-        #              (segment.x[i + 1] - segment.x[i - 1]) for i in range(1, segment.size() - 1)]
-        #    prim_flux = Planck(segment.x*units.nm.to(units.cm), prim_teff)
-        #    lines = FittingUtilities.FindLines(segment)
-        #    sec_flux = np.median(segment.cont[lines] - segment.y[lines])
-        #    flux_ratio.append(np.median(sec_flux) / np.median(prim_flux))
-        #    weights.append(np.sum(np.array(slopes) ** 2))
-
-    # if get_weights:
-    # weights = np.array(weights) * np.array(flux_ratio)
-    #    print "Weights: ", np.array(weights) / np.sum(weights)
-    #    return model_orders, np.array(weights) / np.sum(weights)
     return model_orders
 
 
 def GetCCF(data, model, vsini=10.0, resolution=60000, process_model=True, rebin_data=True, debug=False, outputdir="./",
            addmode="ML", oversample=1, orderweights=None, get_weights=False, prim_teff=10000.0):
     """
+    Generate a cross-correlation function from the given data and model.
     This is the main function. CALL THIS ONE!
-    data: a list of xypoint instances with the data
-    model: Either a string with the model filename, an xypoint instance, or
-           a list of xypoint instances
-    vsini: rotational velocity in km/s
-    resolution: detector resolution in lam/dlam
-    process_model: if true, it will generate a list of model orders suitable
-                   for cross-correlation. Otherwise, it assumes the input
-                   IS such a list
-    rebin_data: If true, it will rebin the data to a constant log-spacing.
-                Otherwise, it assumes the data input already is correctly spaced.
-    debug: Prints debugging info to the screen, and saves various files.
-    addmode: The CCF addition mode. The default is Maximum Likelihood
-               (from Zucker 2003, MNRAS, 342, 1291). The other valid option
-               is "simple", which will just do a straight addition. Maximum
-               Likelihood is better for finding weak signals, but simple is
-               better for determining parameters from the CCF (such as vsini)
-    oversample: If rebin_data = True, this is the factor by which to over-sample
-                the data while rebinning it. Ignored if rebin_data = False
-    orderweights: Weights to apply to each order. Only used if addmode="weighted"
-    get_weights: If true, and process_model=True, then the Process functions will
-                 return both the model orders and weights for each function.In
-                 addition, the weights will be returned in the output dictionary.
-                 The weights are only used if addmode="weighted"
-    prim_teff:   The effective temperature of the primary star. Used to determine the
-                 flux ratio, which in turn is used to make the weights. Ignored if
-                 addmode is not "weighted" or get_weights is False.
+
+    Parameters:
+    ===========
+    - data:                list of kglib.utils.DataStructures.xypoint instances
+                           The data we are cross-correlating against. Each element in the list
+                           is treated like an echelle order.
+
+    - model:               string, xypoint instance, or list of xypoint instances
+                           If a string, should hold the path to an ascii model file.
+                           If an xypoint instance, should hold the full model
+                           If an list of xypoint instances, should be pre-processed for cross-correlation
+                             (such as the output of Process() )
+
+    - vsini:               float
+                           rotational velocity for the model, in km/s
+
+    - resolution:          float
+                           detector resolution in lam/dlam
+
+    - process_model:       boolean
+                           If true, it will generate a list of model orders suitable
+                           for cross-correlation. Otherwise, it assumes the input
+                           IS such a list
+
+    - rebin_data:          boolean
+                           If true, it will rebin the data to a constant log-spacing.
+                           Otherwise, it assumes the data input already is correctly spaced.
+
+    - debug:               boolean
+                           Prints debugging info to the screen, and saves various files.
+
+    - addmode:             string
+                           The CCF addition mode. The default is Maximum Likelihood
+                           (from Zucker 2003, MNRAS, 342, 1291). The other valid options
+                           are "simple", which will just do a straight addition,
+                           "dc", which weights by the CCF value itself, and "weighted",
+                           which weights each order. Maximum Likelihood is better for
+                           finding weak signals, but simple is better for determining
+                           parameters from the CCF (such as vsini)
+
+    - oversample:          integer
+                           If rebin_data = True, this is the factor by which to over-sample
+                           the data while rebinning it. Ignored if rebin_data = False
+
+    - orderweights:        list of floats
+                           Weights to apply to each order. Only used if addmode="weighted".
+                           Must have the same length as the data list
+
+    - get_weights:         boolean
+                           If true, attempts to determine weights from the information content
+                           and flux ratio of the companion spectra.
+                           The weights are only used if addmode="weighted"
+
+    - prim_teff:           float
+                           The effective temperature of the primary star. Used to determine the
+                           flux ratio, which in turn is used to make the weights. Ignored if
+                           addmode is not "weighted" or get_weights is False.
+
+    Returns:
+    ========
+    A dictionary with keys:
+        - CCF:          CCFContainer object
+        - model:        The processed model orders. Useful if looping over many files to reduce workload
+        - data:         The input data, rebinned to a constant log-wavelength spacing if requested
+        - CCF_orders:   The CCFs for each order. Useful for debugging. Only included if debug=True!
     """
     # Some error checking
     if addmode.lower() not in ["ml", "simple", "dc", "weighted"]:
@@ -236,19 +222,58 @@ def GetCCF(data, model, vsini=10.0, resolution=60000, process_model=True, rebin_
     return retdict
 
 
-"""
-  This function does the actual correlation.
-"""
-
-
-def Correlate(data, model_orders, debug=False, outputdir="./", addmode="ML",
+def Correlate(data, model_orders, debug=False, addmode="ML",
               orderweights=None, get_weights=False, prim_teff=10000.0):
+    """
+    This function does the actual correlation. The interface is slightly less useful than GetCCF,
+    but can still be called by the user.
+
+    Parameters:
+    ===========
+    - data:                list of kglib.utils.DataStructures.xypoint instances
+                           The data we are cross-correlating against. Each element in the list
+                           is treated like an echelle order.
+
+    - model_orders:        list of kglib.utils.DataStructures.xypoint instances
+                           Models relevant for each data orders. Must have the same
+                           length as data
+
+    - debug:               boolean
+                           Prints debugging info to the screen, and saves various files.
+
+    - addmode:             string
+                           The CCF addition mode. The default is Maximum Likelihood
+                           (from Zucker 2003, MNRAS, 342, 1291). The other valid options
+                           are "simple", which will just do a straight addition,
+                           "dc", which weights by the CCF value itself, and "weighted",
+                           which weights each order. Maximum Likelihood is better for
+                           finding weak signals, but simple is better for determining
+                           parameters from the CCF (such as vsini)
+
+    - orderweights:        list of floats
+                           Weights to apply to each order. Only used if addmode="weighted".
+                           Must have the same length as the data list
+
+    - get_weights:         boolean
+                           If true, attempts to determine weights from the information content
+                           and flux ratio of the companion spectra.
+                           The weights are only used if addmode="weighted"
+
+    - prim_teff:           float
+                           The effective temperature of the primary star. Used to determine the
+                           flux ratio, which in turn is used to make the weights. Ignored if
+                           addmode is not "weighted" or get_weights is False.
+
+    Returns:
+    ========
+    A CCFContainer object
+    """
+
     # Error checking
     if "weighted" in addmode.lower() and orderweights is None and not get_weights:
         raise ValueError("Must give orderweights if addmode == weighted")
 
     corrlist = []
-    normalization = 0.0
     normalization = 0.0
     info_content = []
     flux_ratio = []
@@ -430,8 +455,15 @@ class CCFContainer(object):
 def GetInformationContent(model):
     """
     Returns an array with the information content (right now, the derivative of the model)
-    :param model: DataStructures.xypoint instance with the model
-    :return: numpy.ndarray with the information content (used as weights)
+
+    Parameters:
+    ===========
+    - model:     kglib.utils.DataStructures.xypoint instance
+                 The model spectra (broadened if necessary)
+
+    Returns:
+    ========
+    numpy.ndarray with the information content (used for weights)
     """
     info = np.ones(model.size())
     info[1:-1] = np.array(
@@ -445,10 +477,23 @@ def get_rv(vel, corr, Npix=None, **fit_kws):
     This will only work if the ccf was made with the maximum likelihood method!
     Uses the formula given in Zucker (2003) MNRAS, 342, 4  for the rv error.
 
-    :param vel:   The velocities
-    :param corr:  The ccf values. Should be the same size as vel
-    :param Npix:  The number of pixels used in the CCF.
-    :return: rv, rv_err, ccf(rv)
+    Parameters:
+    ===========
+    - vel:   numpy.ndarray
+             The velocities
+    - corr:  numpy.ndarray
+             The ccf values. Should be the same size as vel
+    - Npix:  integer
+             The number of pixels used in the CCF.
+
+    Returns:
+    ========
+    -rv:     float
+             The best radial velocity, in km/s
+    -rv_err: float
+             Uncertainty in the velocity, in km/s
+    -ccf:    float
+             The CCF power at the maximum velocity.
     """
     vel = np.atleast_1d(vel)
     corr = np.atleast_1d(corr)
