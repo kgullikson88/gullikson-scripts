@@ -13,10 +13,23 @@ import pandas as pd
 
 
 class CCF_Interface(object):
+    """
+    Provides an interface to the HDF5 cross-correlation function file
+
+    Parameters:
+    ===========
+    - filename:         string
+                        The path to the HDF5 cross-correlation function file.
+
+    - vel:              numpy.ndarray
+                        What velocities should we interpolate the CCFs onto?
+                        You should provide every velocity point you want sampled.
+    """
     def __init__(self, filename, vel=np.arange(-900, 900, 1)):
         self.hdf5 = h5py.File(filename, 'r')
         self.velocities = vel
         self._df = None
+
 
     def __getitem__(self, path):
         return self.hdf5[path]
@@ -25,7 +38,16 @@ class CCF_Interface(object):
     def list_stars(self, print2screen=False):
         """
         List the stars available in the HDF5 file, and the dates available for each
-        :return: A list of the stars
+
+        Parameters:
+        ===========
+        - print2screen:     bool
+                            Should we print the stars and dates to screen?
+
+        Returns:
+        =========
+        - star_list:        list
+                            A list of every star in the file, sorted by name.
         """
         if print2screen:
             for star in sorted(self.hdf5.keys()):
@@ -38,9 +60,24 @@ class CCF_Interface(object):
     def list_dates(self, star, print2screen=False):
         """
         List the dates available for the given star
-        :param star: The name of the star
-        :return: A list of dates the star was observed
+
+        Parameters:
+        ===========
+        - star:             string
+                            The name of the star to search. See self.list_stars() for the valid names.
+
+        - print2screen:     bool
+                            Should we print the stars and dates to screen?
+
+        Returns:
+        =========
+        - date_list:        list
+                            A sorted list of every date the given star was observed.
         """
+        if star not in self.hdf5:
+            logging.warn('Star ({}) not found in HDF5 file!'.format(star))
+            return
+
         if print2screen:
             for date in sorted(self.hdf5[star].keys()):
                 print(date)
@@ -48,10 +85,16 @@ class CCF_Interface(object):
 
     def load_cache(self, addmode='simple'):
         """
-        Read in the whole HDF5 file. This will take a while and take a few Gb of memory, but will speed things up considerably
-        :keyword addmode: The way the individual CCFs were added. Options are:
+        Read in the whole HDF5 file. This will take a while and take a few Gb of memory,
+        but will speed things up considerably
+
+        Parameters:
+        ===========
+        - addmode:    string
+                      The way the individual CCFs were added. Options are:
                           - 'simple'
                           - 'ml'
+                          - 'dc'
                           - 'all'  (saves all addmodes)
         """
         self._df = self._compile_data(addmode=addmode)
@@ -59,23 +102,36 @@ class CCF_Interface(object):
 
     def _compile_data(self, starname=None, date=None, addmode='simple', read_ccf=True):
         """
-        Private function. This reads in all the datasets for the given star and date
-        :param starname: the name of the star. Must be in self.hdf5
-        :param date: The date to search. Must be in self.hdf5[star]
-        :keyword addmode: The way the individual CCFs were added. Options are:
-                          - 'simple'
-                          - 'ml'
-                          - 'all'  (saves all addmodes)
-        :return: a pandas DataFrame with the columns:
-                  - star
-                  - date
-                  - temperature
-                  - log(g)
-                  - [Fe/H]
-                  - vsini
-                  - addmode
-                  - rv (at maximum CCF value)
-                  - CCF height (maximum)
+        This reads in all the datasets for the given star and date
+
+        Parameters:
+        ===========
+        - starname:     string
+                        The name of the star to search. See self.list_stars() for the valid names.
+
+        - date:         string
+                        The date to search. Must be in self.hdf5[star]
+
+        - addmode:      string
+                        The way the individual CCFs were added. Options are:
+                            - 'simple'
+                            - 'ml'
+                            - 'dc'
+                            - 'all'  (saves all addmodes)
+
+        Returns:
+        =========
+        - data:         pandas DataFrame
+                        A dataframe with the following columns:
+                            - star
+                            - date
+                            - temperature
+                            - log(g)
+                            - [Fe/H]
+                            - vsini
+                            - addmode
+                            - rv (at maximum CCF value)
+                            - CCF height (maximum)
         """
         if starname is None:
             df_list = []
@@ -139,10 +195,22 @@ class CCF_Interface(object):
     def get_temperature_run(self, starname=None, date=None, df=None):
         """
         Return the maximum ccf height for each temperature. Either starname AND date, or df must be given
-        :param starname: The name of the star
-        :param date: The date of the observation
-        :param df: Input dataframe, such as from _compile_data. Overrides starname and date, if given
-        :return: a pandas DataFrame with all the best parameters for each temperature
+
+        Parameters:
+        ===========
+        - starname:      string
+                         The name of the star
+
+        - param date:    string
+                         The date of the observation
+
+        - param df:      pandas DataFrame
+                         Input dataframe, such as from _compile_data. Overrides starname and date, if given
+
+        Returns:
+        ========
+        - temp_run:      pandas DataFrame
+                         Contains all the best parameters for each temperature
         """
         # Get the dataframe if it isn't given
         if df is None:
@@ -174,22 +242,32 @@ class CCF_Interface(object):
 
     def get_ccf(self, params, df=None):
         """
-        Get the ccf with the given parameters. A dataframe can be given to speed things up
-        :param params: All the parameters necessary to define a single ccf. This should be
-                       a python dictionary with the keys:
-                       - 'starname': The name of the star. Try self.list_stars() for the options.
-                       - 'date': The UT date of the observations. Try self.list_dates() for the options.
-                       - 'T': temperature of the model
-                       - 'logg': the log(g) of the model
-                       - 'vsini': the vsini by which the model was broadened before correlation
-                       - '[Fe/H]': the metallicity of the model
-                       - 'addmode': The way the order CCFs were added to make a total one. Can be:
-                          - 'simple'
-                          - 'ml'
-                          - 'weighted'
-                          - 'dc'
-        :param df: a pandas DataFrame such as outputted by _compile_data
-        :return: a pandas DataFrame with columns of velocity and CCF power
+        Get the ccf with the given parameters.
+
+        Parameters:
+        ===========
+        - params:    dictionary:
+                     All the parameters necessary to define a single ccf. This should be
+                     a python dictionary with the keys:
+                         - 'starname': The name of the star. Try self.list_stars() for the options.
+                         - 'date': The UT date of the observations. Try self.list_dates() for the options.
+                         - 'T': temperature of the model
+                         - 'logg': the log(g) of the model
+                         - 'vsini': the vsini by which the model was broadened before correlation
+                         - '[Fe/H]': the metallicity of the model
+                         - 'addmode': The way the order CCFs were added to make a total one. Can be:
+                             - 'simple'
+                             - 'ml'
+                             - 'weighted'
+                             - 'dc'
+
+
+        - df:        a pandas DataFrame such as outputted by _compile_data
+
+        Returns:
+        ========
+        -ccf:        pandas DataFrame
+                     Holds columns of velocity and CCF power
         """
         if df is None:
             try:
