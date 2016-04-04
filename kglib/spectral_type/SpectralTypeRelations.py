@@ -1,3 +1,13 @@
+"""
+  Usage:
+         Make instance of class (currently only MainSequence class available
+         call instance.Interpolate(instance.dict, SpT) where dict is the name of the dictionary you want to interpolate (Temperature, Radius, or Mass) and SpT is the spectral type of what you wish to interpolate to.
+
+# Provides relations for temperature, luminosity, radius, and mass for varius spectral types
+#Data comes from Carroll and Ostlie book, or interpolated from it
+#ALL RELATIONS ARE FOR MAIN SEQUENCE ONLY!
+"""
+
 from __future__ import print_function, absolute_import
 
 from collections import defaultdict
@@ -7,28 +17,14 @@ import os
 
 from scipy.interpolate import UnivariateSpline
 import numpy as np
-
 import pandas
+
 from kglib.utils import DataStructures
 
 
 _ROOT = os.path.abspath(os.path.dirname(__file__))
 def get_data(path):
     return os.path.join(_ROOT, 'data', path)
-
-
-
-
-
-# Provides relations temperature, luminosity, radius, and mass for varius spectral types
-#Data comes from Carroll and Ostlie book, or interpolated from it
-#ALL RELATIONS ARE FOR MAIN SEQUENCE ONLY!
-
-"""
-  Usage:
-         Make instance of class (currently only MainSequence class available
-         call instance.Interpolate(instance.dict, SpT) where dict is the name of the dictionary you want to interpolate (Temperature, Radius, or Mass) and SpT is the spectral type of what you wish to interpolate to.
-"""
 
 SPT_PATTERN = '[A-Z]([0-9]\.?[0-9]*)'  # regular expression pattern for identifying spectral types
 
