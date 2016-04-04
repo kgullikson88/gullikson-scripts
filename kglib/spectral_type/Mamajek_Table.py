@@ -1,8 +1,8 @@
 import os
 
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
-
 import pandas as pd
+
 import SpectralTypeRelations
 
 _ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -42,8 +42,15 @@ class MamajekTable(object):
     def get_columns(self, print_keys=True):
         """
         Get the column names in a list, and optionally print them to the screen.
-        :param print_keys: bool variable to decide if the keys are printed.
-        :return:
+
+        Parameters:
+        ===========
+        - print_keys:    boolean
+                         Print the keys to the screen?
+
+        Returns:
+        ========
+        A sorted list of column names.
         """
         if print_keys:
             for k in self.mam_df.keys():
@@ -53,12 +60,25 @@ class MamajekTable(object):
     def get_interpolator(self, xcolumn, ycolumn, extrap='nearest'):
         """
         Get an interpolator instance between the two columns
-        :param xcolumn: The name of the x column to interpolate between
-        :param ycolumn: The name of the value you want to interpolate
-        :param extrap: How to treat extrapolation. Options are:
-                       'nearest': Default behavior. It will return the nearest match to the given 'x' value
-                       'extrapolate': Extrapolate the spline. This is probably only safe for very small extrapolations
-        :return: an interpolator function
+
+        Parameters:
+        ===========
+        - xcolumn:    string
+                      The name of the x column to interpolate between
+
+        - ycolumn:    string
+                      The name of the value you want to interpolate
+
+        - extrap:     string
+                      How to treat extrapolation. Options are:
+                          1. 'nearest': Default behavior. It will return the nearest match
+                             to the given 'x' value
+                          2. 'extrapolate': Extrapolate the spline. This is probably only
+                             safe for very small extrapolations
+
+        Returns:
+        ========
+        A callable interpolator.
         """
         # Make sure the column names are correct
         assert xcolumn in self.mam_df.keys() and ycolumn in self.mam_df.keys()
