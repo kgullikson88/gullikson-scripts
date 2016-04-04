@@ -1,12 +1,9 @@
 from __future__ import division, print_function
 
 import os
-import sys
 from re import search
 from collections import defaultdict
-import itertools
 import logging
-from kglib.utils import FittingUtilities, StarData, HelperFunctions, DataStructures
 from astropy import units, constants
 
 from scipy.interpolate import InterpolatedUnivariateSpline as interp
@@ -14,11 +11,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from astropy.io import fits
-from astropy.io import ascii
 from astropy.analytic_functions import blackbody_lambda
 import h5py
 import seaborn as sns
 
+from kglib.utils import FittingUtilities, StarData, HelperFunctions, DataStructures
 import GenericSearch
 from kglib.stellar_models import StellarModel, Broaden
 from kglib.spectral_type import SpectralTypeRelations, Mamajek_Table
@@ -62,8 +59,8 @@ def GetFluxRatio(sptlist, Tsec, xgrid):
 
 def GetMass(spt):
     """
-    Returns the mass of the system in solar masses
-    spt: Spectral type of the star
+    Returns the mass of the system in solar masses. The parameters
+    `spt` is the spectral type of the star
     """
 
     # Get temperature
@@ -75,7 +72,8 @@ def GetMass(spt):
 
 def get_sec_spt(row):
     """
-    Get the secondary spectral type from the information we have
+    Get the secondary spectral type from the information we have. Meant to be
+    called as the `apply` method of a pandas DataFrame.
     """
     if pd.notnull(row['Sp2']):
         return row['Sp2']
@@ -117,6 +115,10 @@ def return_primary(data):
 mult_filename = '{}/Dropbox/School/Research/Databases/A_star/SB9andWDS.csv'.format(os.environ['HOME'])
 multiples = pd.read_csv(mult_filename)
 def get_companions(starname, sep_max=1.5):
+    """
+    Find companions to the given star, with maximum separation given
+    by the `sep_max` keyword.
+    """
     data = StarData.GetData(starname, safe_spt=True)
 
     # Search for the given star in the database
@@ -180,7 +182,6 @@ def Analyze(fileList,
             metal_values=(0.0,),
             logg_values=(4.5,),
             max_vsini=None,
-            modeldir=StellarModel.modeldir,
             hdf5_file=StellarModel.HDF5_FILE,
             addmode="ML",
             output_mode='hdf5',
@@ -188,40 +189,30 @@ def Analyze(fileList,
             vel_list=range(-400, 450, 50),
             tolerance=5.0,
             rerun=False,
-            debug=False,
-            makeplots=False):
+            debug=False):
     """
-    This function runs a sensitivity analysis using the same methodology as slow_companion_search
-    :param fileList: The list of fits data files
-    :param primary_vsini: A list of the same length as fileList, which contains the vsini for each star (in km/s)
-    :param badregions: A list of wavelength regions to ignore in the CCF (contaminated by tellurics, etc)
-    :param interp_regions: A list of wavelength regions to interpolate over in the data. Generally, badregions should be on the edge of the orders or contain the whole order, and interp_regions should contain a small wavelength range.
-    :param resolution: The detector resolution in lam/dlam. The default is now to use a pre-broadened grid; do not give a value for resolution unless the grid is un-broadened!
-    :param trimsize: The number of pixels to cut from both sides of each order. This is because the  order edges are usually pretty noisy.
-    :param vsini_values: A list of vsini values (in km/s) to apply to each model spectrum before correlation.
-    :param Tvalues: A list of model temperatures (in K) to correlate the data against.
-    :param metal_values: A list of [Fe/H] values to correlate the model against
-    :param logg_values: A list of log(g) values (in cgs units) to correlate the model against
-    :param max_vsini: What is the maximum vsini (in km/s) that we search? If it is given and less than 
-                      any of the vsini_values, then the model we correlate against has this vsini. For example,
-                      if one of the vsini_values is 150 km/s and the max_vsini is 40 km/s, then a 150 km/s model
-                      will be added to the data, but we use a 40 km/s model to correlate against the result.
-    :param modeldir: The model directory. This is no longer used by default!
-    :param hdf5_file: The path to the hdf5 file containing the pre-broadened model grid.
-    :param addmode: The way to add the CCFs for each order. Options are:
-         1: 'simple': Do a simple average
-         2: 'weighted': Do a weighted average: C = \sum_i{w_i C_i^2}
-         3: 'ml': The maximum likelihood estimate. See Zucker 2003, MNRAS, 342, 1291
-         4: 'all': Does all of the above.
-    :param output_mode: How to output. Valid options are:
-         1: text, which is just ascii data with a filename convention.
-         2: hdf5, which ouputs a single hdf5 file with all the metadata necessary to classify the output
-    :param output_file: The name of the HDF5 file to to save the results to. Only used if output_mode='hdf5'.
-    :param vel_list: The list of velocities to add the model to the data with
-    :param tolerance: How close the highest CCF peak needs to be to the correct velocity, to count as a detection
-    :param rerun: If output_mode=hdf5, check to see if the current parameters have already been checked before running.
-    :param debug: Flag to print a bunch of information to screen, and save some intermediate data files
-    :param makeplots: A 'higher level' of debug. Will make a plot of the data and model orders for each model.
+    This function runs a sensitivity analysis using the same methodology as GenericSearch.companion_search.
+    Most of the parameters are the same, with the exception of the ones listed below:
+
+    Parameters:
+    ===========
+    - max_vsini:         float
+                         The maximum vsini (in km/s) that we search. If it is given and less than
+                         any of the vsini_values, then the model we correlate against has this vsini. For example,
+                         if one of the vsini_values is 150 km/s and the max_vsini is 40 km/s, then a 150 km/s model
+                         will be added to the data, but we use a 40 km/s model to correlate against the result.
+
+    - vel_list:          list of floats
+                         The list of radial velocities to add the model to the data with.
+                         This provides for several independent(-ish) tests of the sensitivity
+
+    - tolerance:         float
+                         How close the highest CCF peak needs to be to the correct velocity
+                         to count as a detection
+
+    - rerun:             boolean
+                         If output_mode=hdf5, check to see if the current parameters have
+                         already been checked before running.
     """
 
     model_list = StellarModel.GetModelList(type='hdf5',
@@ -233,14 +224,11 @@ def Analyze(fileList,
                                                        vsini_values=vsini_values, vac2air=True, logspace=True)
 
     get_weights = True if addmode.lower() == "weighted" else False
-    orderweights = None
 
     MS = SpectralTypeRelations.MainSequence()
 
     # Do the cross-correlation
     datadict = defaultdict(list)
-    temperature_dict = defaultdict(float)
-    vbary_dict = defaultdict(float)
     alpha = 0.0
     for temp in sorted(modeldict.keys()):
         for gravity in sorted(modeldict[temp].keys()):
@@ -355,12 +343,23 @@ def Analyze(fileList,
 def check_detection(corr, params, mode='text', tol=5, update=True, hdf5_file='Sensitivity.hdf5', backup=True):
     """
     Check if we detected the companion, and output to a summary file.
-    :param: corr: The DataStructures object holding the cross-correlation function
-    :param params: A dictionary describing the metadata to include
-    :param mode: See docstring for slow_companion_search, param output_mode
-    :keyword tol: Tolerance (in km/s) to count a peak as the 'correct' one.\
-    :keyword backup: Should we write to 2 files instead of just one? That way things we are safe from crashes
-                     corrupting the HDF5 file (but it takes twice the disk space...)
+
+    Parameters
+    ==========
+    - corr:       kglib.utils.DataStructures.xypoint instance
+                  The cross-correlation function.
+
+    - params:     dictionary
+                  The metadata to include in the summary file
+
+    - mode:       See docstring for companion_search, param output_mode
+
+    - tol:        float
+                  Tolerance (in km/s) to count a peak as the 'correct' one.
+
+    - backup:     boolean
+                  Should we write to 2 files instead of just one? That way things we are safe from crashes
+                  corrupting the HDF5 file (but it takes twice the disk space...)
     """
     # Loop through the add-modes if addmode=all
     if params['addmode'].lower() == 'all':
@@ -451,8 +450,6 @@ def check_detection(corr, params, mode='text', tol=5, update=True, hdf5_file='Se
 
         # Add a new dataset. The name doesn't matter
         current_datasets = T.keys()
-        #attr_pars = ['vbary'] if 'vbary' in params else []
-        #attr_pars.extend(['vsini', 'T', 'logg', '[Fe/H]', 'addmode', 'fname'])
         attr_pars = ['vsini', 'logg', '[Fe/H]', 'rv', 'addmode']
         params['vsini'] = params['secondary_vsini']
         params['rv'] = params['velocity']
@@ -467,9 +464,6 @@ def check_detection(corr, params, mode='text', tol=5, update=True, hdf5_file='Se
                         # Hope for the best...
                         pass
                     ds[:] = np.array((corr.x, corr.y))
-                    idx = np.argmax(corr.y)
-                    #ds.attrs['vel_max'] = corr.x[idx]
-                    #ds.attrs['ccf_max'] = corr.y[idx]
                     ds.attrs['vsini'] = params['secondary_vsini']
                     ds.attrs['logg'] = params['logg']
                     ds.attrs['[Fe/H]'] = params['[Fe/H]']
@@ -546,14 +540,26 @@ def check_existence(hdf5_file, params):
 
 
 class HDF5_Interface(object):
+    """
+    An interface to the HDF5 files used in the sensitivity analysis.
+    """
     def __init__(self, filename):
         self.hdf5 = h5py.File(filename, 'r')
 
 
     def list_stars(self, print2screen=False):
         """
-        List the stars available in the HDF5 file, and the dates available for each
-        :return: A list of the stars
+        List the stars available in the HDF5 file
+
+        Parameters:
+        ===========
+        - print2screen:     bool
+                            Should we print the stars and dates to screen?
+
+        Returns:
+        =========
+        - star_list:        list
+                            A list of every star in the file, sorted by name.
         """
         if print2screen:
             for star in sorted(self.hdf5.keys()):
@@ -566,8 +572,19 @@ class HDF5_Interface(object):
     def list_dates(self, star, print2screen=False):
         """
         List the dates available for the given star
-        :param star: The name of the star
-        :return: A list of dates the star was observed
+
+        Parameters:
+        ===========
+        - star:             string
+                            The name of the star to search. See self.list_stars() for the valid names.
+
+        - print2screen:     bool
+                            Should we print the stars and dates to screen?
+
+        Returns:
+        =========
+        - date_list:        list
+                            A sorted list of every date the given star was observed.
         """
         if print2screen:
             for date in sorted(self.hdf5[star].keys()):
@@ -579,9 +596,19 @@ class HDF5_Interface(object):
         """
         This reads in all the datasets for the given star and date.
         If star/date is not given, it reads in all the datesets in the hdf5 file.
-        :param starname: the name of the star. Must be in self.hdf5
-        :param date: The date to search. Must be in self.hdf5[star]
-        :return: a pandas DataFrame with the columns:
+
+        Parameters:
+        ===========
+        - starname:     string
+                        The name of the star. Must be in self.hdf5 if given
+
+        - date:         string
+                        The date to search. Must be in self.hdf5[star]. Ignored
+                        if starname is None.
+
+        Returns:
+        ========
+        A pandas DataFrame with the columns:
                   - star (primary)
                   - primary masses (a list of masses for the primary and any known early-type companions)
                   - primary temps (a list of temperatures for the primary and any known early-type companions)
@@ -667,8 +694,7 @@ class HDF5_Interface(object):
         for col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='ignore')
         return df
-        
-        
+
 
 """
 =================================================
@@ -679,9 +705,8 @@ class HDF5_Interface(object):
 
 def get_luminosity_ratio(row):
     """
-    Given a row in the overall dataframe, figure out the luminosity ratio. This is meant to be called via df.map
-    :param row:
-    :return:
+    Given a row in the overall dataframe, figure out the luminosity ratio.
+    This is meant to be called via df.map
     """
     # Get luminosity ratio
     lum_prim = 0
@@ -697,19 +722,14 @@ def get_luminosity_ratio(row):
 def get_contrast(row, band='V'):
     """
     Given a row in the overall dataframe, work out the contrast ratio in the requested magnitude filter
-    :param row:
-    :param band: The Johnson filter to get the contrast ratio in
-    :return:
+    This is meant to be called via df.map
     """
-    # pri_spts = [MS.GetSpectralType(MS.Temperature, T, prec=1e-3) for T in row['primary temps']]
-    #pri_spts = [MS.GetSpectralType('temperature', T, prec=1e-3) for T in row['primary temps']]
-    #pri_mags = [MS.GetAbsoluteMagnitude(s, color=band) for s in pri_spts]
+
     pri_spts = MS.GetSpectralType('temperature', row['primary temps'], prec=1e-3)
     pri_mags = MS.GetAbsoluteMagnitude(pri_spts, color=band)
     pri_total_mag = HelperFunctions.add_magnitudes(*pri_mags)
 
     Tsec = float(row['temperature'])
-    # sec_mag = MS.GetAbsoluteMagnitude(MS.GetSpectralType(MS.Temperature, Tsec, prec=1e-3), color=band)
     sec_mag = MS.GetAbsoluteMagnitude(MS.GetSpectralType('temperature', Tsec, prec=1e-3), color=band)
 
     return float(sec_mag - pri_total_mag)
@@ -718,8 +738,15 @@ def get_contrast(row, band='V'):
 def read_hdf5(hdf5_file):
     """
     Reads the hdf5 file into a dataframe. Assumes a very specific format!
-    :param hdf5_file: the full path to the hdf5 file.
-    :return: a pandas dataframe containing summary information
+
+    Parameters:
+    ===========
+    - hdf5_file:   string
+                   The full path to the hdf5 file.
+
+    Returns
+    ========
+    A pandas DataFrame containing summary information
     """
     logging.info('Reading HDF5 file {}'.format(hdf5_file))
     hdf5_int = HDF5_Interface(hdf5_file)
@@ -728,7 +755,6 @@ def read_hdf5(hdf5_file):
 
     # Get the contrast. Split by group and then merge to limit the amount of calculation needed
     logging.info('Estimating the V-band contrast ratio for each trial')
-    keys = [u'primary temps', u'temperature']
     test_vsini = df.vsini.unique()[0]
     temp = df.loc[(df.rv == 0) & (df.vsini == test_vsini)].drop_duplicates(subset=['star', 'temperature'])
     temp['contrast'] = temp.apply(lambda r: get_contrast(r, band='V'), axis=1)
@@ -746,6 +772,27 @@ def read_hdf5(hdf5_file):
 def heatmap(df, ax=None, make_cbar=True, make_labels=True, **plot_kws):
     """
     Make a heatmap of the pandas dataframe using the first three columns
+
+    Parameters
+    ==========
+    - df:         pandas DataFrame
+                  a "tidy form" dataframe. Must have at least three columns!
+
+    - ax:         matplotlib axis
+                  The axis to draw the heatmap on. If not given, a new figure
+                  is made.
+
+    -make_cbar:   boolean
+                  Draw a colorbar for the plot?
+
+    -make_labels: boolean
+                  Draw axis labels?
+
+    - plot_kws:   Any additional keyword arguments to pass to pyplot.matshow
+
+    Returns:
+    ========
+    The output of pyplot.matshow()
     """
     xcol, ycol, color_col = df.columns[:3]
     x_range = (df[xcol].min(), df[xcol].max())
@@ -776,8 +823,14 @@ def summarize_sensitivity(sens_df):
     Summarize the sensitivity analysis by finding the detection rate and average significance
     as a function of teff and vsini
 
-    :param sens_df:   The DataFrame generated by read_hdf5 (and probably available in Sensitivity_Dataframe.csv)
-    :return: A pandas dataframe with the summary
+    Parameters:
+    ===========
+    - sens_df:   pandas DataFrame
+                 The DataFrame such as generated by read_hdf5
+
+    Returns:
+    ========
+    A pandas dataframe with the summary
     """
     cols = ['star', 'date', '[Fe/H]', 'logg', 'addmode', 'temperature', 'vsini']
     detrate = sens_df.groupby(cols).apply(lambda d: (d.significance > 5).sum() / float(len(d)))
@@ -788,14 +841,26 @@ def summarize_sensitivity(sens_df):
     return detrate
 
 
-def analyze_sensitivity(hdf5_file='Sensitivity.hdf5', interactive=True, update=True, combine=False, **heatmap_kws):
+def analyze_sensitivity(hdf5_file='Sensitivity.hdf5', interactive=True, update=True, **heatmap_kws):
     """
-    This uses the output of a previous run of check_sensitivity, and makes plots
-    :keyword interactive: If True, the user will pick which stars to plot
-    :keyword update: If True, always update the Sensitivity_Dataframe.csv file.
-                     Otherwise, try to load that file instead of reading the hdf5 file
-    :keyword combine: If True, combine the sensitivity matrix for all stars to get an average sensitivity
-    :return:
+    This uses the output of a previous run of check_sensitivity, and makes plots.
+    Frankly, the `summarize_sensitivity` function is more useful.
+
+    Parameters:
+    ===========
+    - interactive:    boolean
+                      If True, the user will pick which stars to plot
+
+    - update:         boolean
+                      If True, always update the Sensitivity_Dataframe.csv file.
+                      Otherwise, try to load that file instead of reading the hdf5 file
+
+    - heatmap_kws:    Any other keyword arguments to pass to Sensitivity.heatmap()
+
+    Returns:
+    ========
+    A dictionary of dictionaries. The inner dictionaries hold pandas DataFrames
+    for specific parameter sets.
     """
     if not update and os.path.isfile('Sensitivity_Dataframe.csv'):
         df = pd.read_csv('Sensitivity_Dataframe.csv')
@@ -883,6 +948,8 @@ def analyze_sensitivity(hdf5_file='Sensitivity.hdf5', interactive=True, update=T
 
 
 def add_top_axis(axis, spt_values=('M5', 'M0', 'K5', 'K0', 'G5', 'G0')):
+    """ Add a top axis with spectral type information """
+
     # get the full range of the axis.
     xlim = axis.get_xlim()
 
@@ -903,10 +970,20 @@ def add_top_axis(axis, spt_values=('M5', 'M0', 'K5', 'K0', 'G5', 'G0')):
 
 def parse_input(inp, sort_output=True, ensure_unique=True):
     """
-    Parse the user input to get a list of integers
-    :param inp: Can be in the form 'a-b', 'a,b,c', 'a-b,c-d', etc.
-                '-' means an inclusive list of every number between a and b
-                ',' means the numbers a and b
+    Parse the user input to get a list of integers.
+
+    Parameters:
+    ===========
+    - inp:           string
+                     Can be in the form 'a-b', 'a,b,c', 'a-b,c-d', etc.
+                     '-' means an inclusive list of every number between a and b
+                     ',' means the numbers a and b
+
+    - sort_output:   boolean
+                     Sort the output integers?
+
+    - ensure_unique: boolean
+                     Make sure the final list has no repeats?
     :return: A list of integers
     """
     sublists = inp.split(',')
@@ -928,14 +1005,27 @@ def parse_input(inp, sort_output=True, ensure_unique=True):
 
 def plot_expected(orders, prim_spt, Tsec, instrument, vsini=None, rv=0.0, twoaxes=False):
     """
-    Plot the orders, with a model spectrum added at appropriate flux ratio
-    :param orders: A list of Datastructures.xypoint instances
-    :param prim_spt: The primary star spectral type
-    :param Tsec: The secondary temperature
-    :param instrument: The name of the instrument the observation came from
-    :param vsini: the vsini of the companion
-    :param rv: the rv shift of the companion
-    :return:
+    Plot the data orders, with a model spectrum added at appropriate flux ratio
+
+    Parameters
+    ==========
+    - orders:        A list of kglib.utils.Datastructures.xypoint instances
+                     The observed spectra, split into echelle orders
+
+    - prim_spt:      string
+                     The primary star spectral type
+
+    - Tsec:          float
+                     The secondary temperature
+
+    - instrument:    string
+                     The name of the instrument the observation came from
+
+    - vsini:         float
+                     The vsini of the companion, in km/s
+
+    - rv:            float
+                     The rv shift of the companion
     """
 
     sns.set_context('paper', font_scale=2.0)
