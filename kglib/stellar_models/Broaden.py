@@ -3,6 +3,7 @@
   will let the user do rotational broadening, macroturbulent 
   broadening, and Gaussian broadening (reducing the resolution)
 """
+from __future__ import print_function, division, absolute_import
 
 from scipy.special import erf  # Error function
 from scipy.signal import fftconvolve
@@ -21,13 +22,21 @@ def MacroBroad(data, vmacro, extend=True):
     for the terrible variable names, it was copied from
     convol.pro in AnalyseBstar (Karolien Lefever)
 
-    -data:   A DataStructures.xypoint instance storing the data to be
-             broadened. The data MUST be equally-spaced before calling
-             this!
+    Parameters:
+    ===========
+    -data:     kglib.utils.DataStructures.xypoint instance
+               Stores the data to be broadened. The data MUST
+               be equally-spaced before calling this!
 
-    -vmacro: The macroturbulent velocity, in km/s
+    -vmacro:   float
+               The macroturbulent velocity, in km/s
 
-    -extend: If true, the y-axis will be extended to avoid edge-effects
+    -extend:   boolean
+               If true, the y-axis will be extended to avoid edge-effects
+
+    Returns:
+    ========
+    A broadened version of data.
     """
     # Make the kernel
     c = constants.c.cgs.value * units.cm.to(units.km)
