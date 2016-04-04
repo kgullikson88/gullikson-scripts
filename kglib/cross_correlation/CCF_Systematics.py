@@ -24,7 +24,7 @@ from kglib.spectral_type import SpectralTypeRelations
 
 def classify_filename(fname, type='bright'):
     """
-    Given a CCF filename, it classifies the star combination, temperature, metallicity, and vsini
+    Given a CCF filename, classify the star combination, temperature, metallicity, and vsini
     :param fname:
     :return:
     """
