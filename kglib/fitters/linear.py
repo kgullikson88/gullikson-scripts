@@ -1,5 +1,5 @@
 """
-Defines a few functions linear fits
+Defines a few functions for linear fits
 """
 
 from __future__ import print_function, division, absolute_import
@@ -15,11 +15,24 @@ from statsmodels.robust.norms import TukeyBiweight
 def RobustFit(x, y, fitorder=3, weight_fcn=TukeyBiweight(), badregions=None):
     """
     Performs a robust fit (less sensitive to outliers) to x and y
-    :param x: A numpy.ndarray with the x-coordinates of the function to fit
-    :param y: A numpy.ndarray with the y-coordinates of the function to fit
-    :param fitorder: The order of the fit
-    :param badregions: A list of lists containing wavelength regions to ignore in the fit
-    :return: The fitted y values at each x-point.
+
+    Parameters:
+    ===========
+    - x:            numpy.ndarray
+                    The x-coordinates of the function to fit
+
+    - y:            numpy.ndarray
+                    The y-coordinates of the function to fit
+
+    - fitorder:     integer
+                    The order of the fit
+
+    - badregions:   A list of lists
+                    Contains wavelength regions to ignore in the fit
+
+    Returns:
+    ========
+    The fitted y values at each x-point.
     """
     # Re-scale x for stability
     if badregions is None:
@@ -47,13 +60,26 @@ def ChebFit2D(x, y, z, x_degree=2, y_degree=2):
     """
     Perform a fit to a 2D polynomial with point z=f(x,y)
 
-    :param x: numpy.ndarray with the x-coordinates of the function to fit
-    :param y: numpy.ndarray with the y-coordinates of the function to fit
-    :param z: numpy.ndarray with the z-coordinates of the function to fit
-    :param x_degree: The degree of the chebyshev polynomial in the x direction
-    :param y_degree: The degree of the chebyshev polynomial in the y direction
+    Parameters:
+    ===========
+    - x:            numpy.ndarray
+                    The x-coordinates of the function to fit
 
-    Returns a function that takes new values of (x,y) and returns the fitted z
+    - y:            numpy.ndarray
+                    The y-coordinates of the function to fit
+
+    - z:            numpy.ndarray
+                    The z-coordinates of the function to fit
+
+    - x_degree:     integer
+                    The degree of the chebyshev polynomial in the x direction
+
+    - y_degree:     integer
+                    The degree of the chebyshev polynomial in the y direction
+
+    Returns:
+    ========
+    A callable function that takes new values of (x,y) and returns the fitted z
 
     """
     p_init = Chebyshev2D(x_degree=x_degree, y_degree=y_degree)
