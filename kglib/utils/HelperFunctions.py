@@ -5,11 +5,10 @@
 from __future__ import print_function, absolute_import
 
 import os
-import csv
-from collections import defaultdict
 import logging
 
 from astropy import units as u, constants
+from astropy import convolution
 from scipy.optimize import bisect
 from scipy.stats import scoreatpercentile
 from scipy.signal import kaiserord, firwin, lfilter
@@ -17,9 +16,9 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spline, Univariate
 from astropy.io import fits as pyfits
 import numpy as np
 from astropy.time import Time
-
 from statsmodels.stats.proportion import proportion_confint
 import pandas as pd
+
 from kglib.utils import DataStructures
 from kglib.spectral_type import SpectralTypeRelations
 from kglib.utils import readmultispec as multispec
@@ -66,6 +65,45 @@ def SmoothData(order, windowsize=91, smoothorder=5, lowreject=3, highreject=3, n
     return denoised
 
 
+def astropy_smooth(data, vel, linearize=False, kernel=convolution.Gaussian1DKernel, **kern_args):
+    """
+    Smooth using an astropy filter
+    :param data: An xypoint with the data to smooth
+    :param vel: The velocity scale to smooth out. Can either by an astropy quantities or a float in km/s
+    :param linearize: If True, we will put the data in a constant log-wavelength spacing grid before smoothing.
+    :param kernel: The astropy kernel to use for smoothing
+    :param kern_args: Kernel arguments beyond width
+    :return: A smoothed version of the data, on the same wavelength grid as the data
+    """
+
+    if linearize:
+        original_data = data.copy()
+        datafcn = spline(data.x, data.y, k=3)
+        linear = DataStructures.xypoint(data.x.size)
+        linear.x = np.logspace(np.log10(data.x[0]), np.log10(data.x[-1]), linear.size())
+        linear.y = datafcn(linear.x)
+        data = linear
+
+    # Figure out feature size in pixels
+    if not isinstance(vel, u.quantity.Quantity):
+        vel *= u.km / u.second
+
+    # featuresize = (np.median(data.x) * vel / constants.c).decompose().value
+    #dlam = data.x[1] - data.x[0]
+    featuresize = (vel / constants.c).decompose().value
+    dlam = np.log(data.x[1] / data.x[0])
+    Npix = featuresize / dlam
+
+    # Make kernel and smooth
+    kern = kernel(Npix, **kern_args)
+    smoothed = convolution.convolve(data.y, kern, boundary='extend')
+
+    if linearize:
+        fcn = spline(data.x, smoothed)
+        return fcn(original_data.x)
+    return smoothed
+
+
 def roundodd(num):
     rounded = round(num)
     if rounded % 2 != 0:
@@ -76,162 +114,6 @@ def roundodd(num):
         else:
             return rounded + 1
 
-
-
-def GetStarData(starname):
-    """
-      Return a dictionary with the SimBad data for a given star.
-    """
-    raise NotImplementedError
-    #link = sim.buildLink(starname)
-    #star = sim.simbad(link)
-    #return star
-
-
-WDS_location = "%s/Dropbox/School/Research/AstarStuff/TargetLists/WDS_MagLimited.csv" % (os.environ["HOME"])
-
-
-def CheckMultiplicityWDS(starname):
-    """
-      Check to see if the given star is a binary in the WDS catalog
-      If so, return the most recent separation and magnitude of all
-      components.
-    """
-    if type(starname) == str:
-        star = GetStarData(starname)
-    elif isinstance(starname, sim.simbad):
-        star = starname
-    else:
-        print( "Error! Unrecognized variable type in HelperFunctions.CheckMultiplicity!")
-        return False
-
-    all_names = star.names()
-
-    # Check if one of them is a WDS name
-    WDSname = ""
-    for name in all_names:
-        if "WDS" in name[:4]:
-            WDSname = name
-    if WDSname == "":
-        return False
-
-    # Get absolute magnitude of the primary star, so that we can determine
-    # the temperature of the secondary star from the magnitude difference
-    MS = SpectralTypeRelations.MainSequence()
-    print( star.SpectralType()[:2])
-    p_Mag = MS.GetAbsoluteMagnitude(star.SpectralType()[:2], 'V')
-
-
-    #Now, check the WDS catalog for this star
-    searchpart = WDSname.split("J")[-1].split("A")[0]
-    infile = open(WDS_location, 'rb')
-    lines = csv.reader(infile, delimiter=";")
-    components = defaultdict(lambda: defaultdict())
-    for line in lines:
-        if searchpart in line[0]:
-            sep = float(line[9])
-            mag_prim = float(line[10])
-            component = line[2]
-            try:
-                mag_sec = float(line[11])
-                s_Mag = p_Mag + (mag_sec - mag_prim)  #Absolute magnitude of the secondary
-                s_spt = MS.GetSpectralType(MS.AbsMag, s_Mag)  #Spectral type of the secondary
-            except ValueError:
-                mag_sec = "Unknown"
-                s_spt = "Unknown"
-            components[component]["Separation"] = sep
-            components[component]["Primary Magnitude"] = mag_prim
-            components[component]["Secondary Magnitude"] = mag_sec
-            components[component]["Secondary SpT"] = s_spt
-    return components
-
-
-SB9_location = "%s/Dropbox/School/Research/AstarStuff/TargetLists/SB9public" % (os.environ["HOME"])
-
-
-def CheckMultiplicitySB9(starname):
-    """
-      Check to see if the given star is a binary in the SB9 catalog
-      Ef so, return some orbital information about all the components
-    """
-    # First, find the record number in SB9
-    infile = open("%s/Alias.dta" % SB9_location)
-    lines = infile.readlines()
-    infile.close()
-
-    index = -1
-    for line in lines:
-        segments = line.split("|")
-        name = segments[1] + " " + segments[2].strip()
-        if starname == name:
-            index = int(segments[0])
-    if index < 0:
-        # Star not in SB9
-        return False
-
-    # Now, get summary information for our star
-    infile = open("%s/Main.dta" % SB9_location)
-    lines = infile.readlines()
-    infile.close()
-
-    companion = {}
-
-    num_matches = 0
-    for line in lines:
-        segments = line.split("|")
-        if int(segments[0]) == index:
-            num_matches += 1
-            # information found
-            component = segments[3]
-            mag1 = float(segments[4]) if len(segments[4]) > 0 else "Unknown"
-            filt1 = segments[5]
-            mag2 = float(segments[6]) if len(segments[6]) > 0 else "Unknown"
-            filt2 = segments[7]
-            spt1 = segments[8]
-            spt2 = segments[9]
-            companion["Magnitude"] = mag2 if filt1 == "V" else "Unknown"
-            companion["SpT"] = spt2
-
-    # Finally, get orbit information for our star (Use the most recent publication)
-    infile = open("%s/Orbits.dta" % SB9_location)
-    lines = infile.readlines()
-    infile.close()
-
-    matches = []
-    for line in lines:
-        segments = line.split("|")
-        if int(segments[0]) == index:
-            matches.append(line)
-    if len(matches) == 1:
-        line = matches[0]
-    else:
-        date = 0
-        line = matches[0]
-        for match in matches:
-            try:
-                year = int(match.split("|")[22][:4])
-                if year > date:
-                    date = year
-                    line = match
-            except ValueError:
-                continue
-
-    #information found
-    period = float(segments[2]) if len(segments[2]) > 0 else "Unknown"
-    T0 = float(segments[4]) if len(segments[4]) > 0 else "Unknown"
-    e = float(segments[7]) if len(segments[7]) > 0 else "Unknown"
-    omega = float(segments[9]) if len(segments[9]) > 0 else "Unknown"
-    K1 = float(segments[11]) if len(segments[11]) > 0 else "Unknown"
-    K2 = float(segments[13]) if len(segments[13]) > 0 else "Unknown"
-
-    companion["Period"] = period
-    companion["Periastron Time"] = T0
-    companion["Eccentricity"] = e
-    companion["Argument of Periastron"] = omega
-    companion["K1"] = K1
-    companion["K2"] = K2
-
-    return companion
 
 
 def BinomialErrors_old(nobs, Nsamp, alpha=0.16):
@@ -296,7 +178,12 @@ def GetSurrounding(full_list, value, return_index=False):
 def ReadExtensionFits(datafile):
     """
       A convenience function for reading in fits extensions without needing to
-      give the name of the standard field names that I use.
+      give the name of the standard field names that I use. The standard field
+      names are :
+          - 'wavelength'
+          - 'flux'
+          - 'continuum'
+          - 'error'
     """
     return ReadFits(datafile,
                     extensions=True,
@@ -626,46 +513,7 @@ def HighPassFilter(data, vel, width=5, linearize=False):
         return smoothed_y
 
 
-from astropy import convolution
 
-
-def astropy_smooth(data, vel, linearize=False, kernel=convolution.Gaussian1DKernel, **kern_args):
-    """
-    Smooth using an astropy filter
-    :param data: An xypoint with the data to smooth
-    :param vel: The velocity scale to smooth out. Can either by an astropy quantities or a float in km/s
-    :param linearize: If True, we will put the data in a constant log-wavelength spacing grid before smoothing.
-    :param kernel: The astropy kernel to use for smoothing
-    :param kern_args: Kernel arguments beyond width
-    :return: A smoothed version of the data, on the same wavelength grid as the data
-    """
-
-    if linearize:
-        original_data = data.copy()
-        datafcn = spline(data.x, data.y, k=3)
-        linear = DataStructures.xypoint(data.x.size)
-        linear.x = np.logspace(np.log10(data.x[0]), np.log10(data.x[-1]), linear.size())
-        linear.y = datafcn(linear.x)
-        data = linear
-
-    # Figure out feature size in pixels
-    if not isinstance(vel, u.quantity.Quantity):
-        vel *= u.km / u.second
-
-    #featuresize = (np.median(data.x) * vel / constants.c).decompose().value
-    #dlam = data.x[1] - data.x[0]
-    featuresize = (vel / constants.c).decompose().value
-    dlam = np.log(data.x[1] / data.x[0])
-    Npix = featuresize / dlam
-
-    # Make kernel and smooth
-    kern = kernel(Npix, **kern_args)
-    smoothed = convolution.convolve(data.y, kern, boundary='extend')
-
-    if linearize:
-        fcn = spline(data.x, smoothed)
-        return fcn(original_data.x)
-    return smoothed
 
 
 
@@ -712,10 +560,6 @@ if mlpy_import:
     # Kept for legacy support, since I was using Denoise3 in several codes in the past.
     def Denoise3(data):
         return Denoise(data)
-
-if emcee_import:
-    def BayesFit(*args, **kwargs):
-        raise NotImplementedError('This function has moved to the Fitters module!')
 
 
 def Gauss(x, mu, sigma, amp=1):
@@ -775,9 +619,6 @@ def IsListlike(arg):
     except TypeError:  # catch when for loop fails
         return False
 
-
-def ListModel(*args, **kwargs):
-    raise NotImplementedError('This function has moved to the Fitters module!')
 
 
 def mad(arr):
@@ -1032,9 +873,6 @@ def FindOrderNums(orders, wavelengths):
     return nums
 
 
-def RobustFit(*args, **kwargs):
-    raise NotImplementedError('This function has moved to the Fitters module!')
-
 
 def add_magnitudes(*mag_list):
     """
@@ -1112,9 +950,7 @@ def is_close(num1, num2, inf_true=True, both_inf=False):
     """
     if isinstance(num1, basestring) or isinstance(num2, basestring):
         return num1 == num2
-    #if num1 == num2:
-    #    # Handles things like strings
-    #    return True
+
     if np.isfinite(num1) and np.isfinite(num2):
         return np.isclose(num1, num2)
 
@@ -1173,60 +1009,7 @@ class ErrorPropagationSpline(object):
 
 
 def CombineXYpoints(xypts, snr=None, xspacing=None, numpoints=None, interp_order=3):
-    """
-    Function to combine a list of xypoints into a single
-      xypoint. Useful for combining several orders/chips
-      or for coadding spectra
-
-    Warning! This function is basically un-tested!
-
-      ***Optional keywords***
-      snr: the spectra will be weighted by the signal-to-noise ratio
-           before adding
-      xspacing: the x-spacing in the final array
-      numpoints: the number of points in the final array. If neither
-                 numpoints nor xspacing is given, the x-spacing in the
-                 final array will be determined by averaging the spacing
-                 in each of the xypoints.
-      interp_order: the interpolation order. Default is cubic
-    """
-
-    if snr is None or type(snr) != list:
-        snr = [1.0] * len(xypts)
-
-    # Find the maximum range of the x data:
-    first = np.min([o.x[0] for o in xypts])
-    last = np.max([o.x[-1] for o in xypts])
-    avg_spacing = np.mean([(o.x[-1] - o.x[0]) / float(o.size() - 1) for o in xypts])
-
-    if xspacing is None and numpoints is None:
-        xspacing = avg_spacing
-    if numpoints is None:
-        if xspacing is None:
-            xspacing = avg_spacing
-        numpoints = (last - first) / xspacing
-    x = np.linspace(first, last, numpoints)
-
-    full_array = DataStructures.xypoint(x=x, y=np.zeros(x.size), err=np.zeros(x.size))
-    numvals = np.zeros(x.size, dtype=np.float)  # The number of arrays each x point is in
-    normalization = 0.0
-    for xypt in xypts:
-        #interpolator = ErrorPropagationSpline(xypt.x, xypt.y / xypt.cont, xypt.err / xypt.cont, k=interp_order)
-        interpolator = spline(xypt.x, xypt.y/xypt.cont, k=interp_order)
-        err_interpolator = spline(xypt.x, xypt.err/xypt.cont, k=interp_order)
-        left = np.searchsorted(full_array.x, xypt.x[0])
-        right = np.searchsorted(full_array.x, xypt.x[-1], side='right')
-        if right < xypt.size():
-            right += 1
-        numvals[left:right] += 1.0
-        val, err = interpolator(full_array.x[left:right]), err_interpolator(full_array.x[left:right])
-        full_array.y[left:right] += val
-        full_array.err[left:right] += err ** 2
-
-    full_array.err = np.sqrt(full_array.err)
-    full_array.y[numvals > 0] /= numvals[numvals > 0]
-    return full_array
-
+    raise NotImplementedError('This function has moved to kglib.utils.DataStructures!')
 
 def weighted_mean_and_stddev(arr, weights=None, bad_value=np.nan):
     arr = np.atleast_1d(arr).astype(np.float)
