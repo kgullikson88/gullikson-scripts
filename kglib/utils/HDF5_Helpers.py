@@ -1,3 +1,5 @@
+from __future__ import print_function, division, absolute_import
+
 import logging
 import os
 import warnings
@@ -5,8 +7,8 @@ from collections import defaultdict
 
 import h5py
 import numpy as np
-
 import pandas as pd
+
 from kglib.cross_correlation import Analyze_CCF
 from HelperFunctions import roundodd, mad, integral
 from kglib.cross_correlation import CCF_Systematics
@@ -17,6 +19,27 @@ home = os.environ['HOME']
 
 
 def create_group(current, name, attrs, overwrite):
+    """
+    Create and HDF5 group from the current level.
+
+    Parameters:
+    ===========
+    - current:    h5py Group or File object
+                  The current level
+
+    - name:       string
+                  The name of the new group
+
+    - attrs:      dictionary
+                  attributes to assign to the group
+
+    - overwrite:  boolean
+                  If True and the name is already a group in the current level,
+                  overwrite it. Otherwise, just return that group.
+
+    Returns:
+    An h5py Group object.
+    """
     if name in current:
         if not overwrite:
             return current[name]
@@ -33,6 +56,30 @@ def create_group(current, name, attrs, overwrite):
 
 
 def create_dataset(group, name, attrs, data, overwrite, **kwargs):
+    """
+    Create and HDF5 dataset from the current level.
+
+    Parameters:
+    ===========
+    - group:      h5py Group or File object
+                  The current level. The dataset will be made in
+                  this "folder".
+
+    - name:       string
+                  The name of the new dataset
+
+    - attrs:      dictionary
+                  attributes to assign to the dataset
+
+    - overwrite:  boolean
+                  If True and the name is already a dataset in the current level,
+                  overwrite it. Otherwise, just return that dataset.
+
+    - **kwargs:   Any additional keyword arguments to pass to group.create_dataset.
+
+    Returns:
+    An h5py dataset object.
+    """
     if name in group:
         new_ds = group[name]
         if not overwrite:
@@ -54,12 +101,23 @@ def create_dataset(group, name, attrs, data, overwrite, **kwargs):
 
 def combine_hdf5_synthetic(file_list, output_file, overwrite=True):
     """
-    Combine several hdf5 files into one. The structure is assumed to be that of the synthetic binary search
-    :param file_list: A list containing the filenames of the hdf5 files to combine
-    :param output_file: The name of the file to output with the combined data
-    :param overwrite: If True, it overwrites any duplicated datasets.
+    Combine several hdf5 files into one.
+    The structure is assumed to be that of the synthetic binary search
+
+    Parameters:
+    ===========
+    - file_list:      iterable
+                      A list containing the filenames of the hdf5
+                      files to combine. Each file must have the very
+                      specific structure of a synthetic binary star
+                      search.
+
+    - output_file:    string
+                      The name of the file to output with the combined data
+
+    - overwrite:      boolean
+                      If True, it overwrites any duplicated datasets in the output.
                       The last hdf5 file in the file_list will not be overwritten.
-    :return: None
     """
     if output_file in file_list:
         raise ValueError('Output file cannot be one of the input files!')
@@ -110,12 +168,23 @@ def combine_hdf5_synthetic(file_list, output_file, overwrite=True):
 
 def combine_hdf5_real(file_list, output_file, overwrite=True):
     """
-    Combine several hdf5 files into one. The structure is assumed to be that of the normal binary search
-    :param file_list: A list containing the filenames of the hdf5 files to combine
-    :param output_file: The name of the file to output with the combined data
-    :param overwrite: If True, it overwrites any duplicated datasets.
+    Combine several hdf5 files into one.
+    The structure is assumed to be that of the normal binary search
+
+     Parameters:
+    ===========
+    - file_list:      iterable
+                      A list containing the filenames of the hdf5
+                      files to combine. Each file must have the very
+                      specific structure of my binary star
+                      search.
+
+    - output_file:    string
+                      The name of the file to output with the combined data
+
+    - overwrite:      boolean
+                      If True, it overwrites any duplicated datasets in the output.
                       The last hdf5 file in the file_list will not be overwritten.
-    :return: None
     """
     if output_file in file_list:
         raise ValueError('Output file cannot be one of the input files!')
@@ -160,12 +229,22 @@ def combine_hdf5_real(file_list, output_file, overwrite=True):
 
 def combine_hdf5_sensitivity(file_list, output_file='tmp.fits', overwrite=True):
     """
-    Combine several hdf5 files into one. The structure is assumed to be that of the sensitivity analysis
-    :param file_list: A list containing the filenames of the hdf5 files to combine
-    :param output_file: The name of the file to output with the combined data
-    :param overwrite: If True, it overwrites any duplicated datasets.
+    Combine several hdf5 files into one.
+    The structure is assumed to be that of the sensitivity analysis
+
+     Parameters:
+    ===========
+    - file_list:      iterable
+                      A list containing the filenames of the hdf5
+                      files to combine. Each file must have the very
+                      specific structure of my sensitivity analysis.
+
+    - output_file:    string
+                      The name of the file to output with the combined data
+
+    - overwrite:      boolean
+                      If True, it overwrites any duplicated datasets in the output.
                       The last hdf5 file in the file_list will not be overwritten.
-    :return: None
     """
     if output_file in file_list:
         raise ValueError('Output file cannot be one of the input files!')
@@ -221,21 +300,26 @@ class Full_CCF_Interface(object):
     """
 
     def __init__(self, cache=False, update_cache=True, **cache_kwargs):
+        """
+        Parameters:
+        ===========
+        - cache:          boolean
+                          Should we use/create a cache of the HDF5 datasets?
+                          Speeds things up significantly, but takes more memory.
+
+        - update_cache:   boolean
+                          SHould we update the cache? Only used if cache = True
+
+        - cache_kwargs:   Any additional keyword arguments to pass to
+                          self._make_cache. Especially useful is
+                          cache_fname, giving a CSV file with the information.
+        """
         # Instance variables to hold the ccf interfaces
         self._ccf_files = {'TS23': '{}/School/Research/McDonaldData/Cross_correlations/CCF.hdf5'.format(home),
                            'HET': '{}/School/Research/HET_data/Cross_correlations/CCF.hdf5'.format(home),
                            'CHIRON': '{}/School/Research/CHIRON_data/Cross_correlations/CCF.hdf5'.format(home),
                            'IGRINS': '{}/School/Research/IGRINS_data/Cross_correlations/CCF.hdf5'.format(home)}
-        #self._ccf_files = {'TS23': '{}/School/Research/McDonaldData/Cross_correlations/CCF_Kurucz.hdf5'.format(home),
-        #                   'HET': '{}/School/Research/HET_data/Cross_correlations/CCF_Kurucz.hdf5'.format(home),
-        #                   'CHIRON': '{}/School/Research/CHIRON_data/Cross_correlations/CCF_Kurucz.hdf5'.format(home),
-        #                   'IGRINS': '{}/School/Research/IGRINS_data/Cross_correlations/CCF_Kurucz.hdf5'.format(home)}
-        #self._ccf_files = {'TS23': '{}/School/Research/McDonaldData/Cross_correlations/CCF_HIP16147.hdf5'.format(home)}
-        #self._ccf_files = {'TS23': '{}/School/Research/McDonaldData/Cross_correlations/CCF_primary_total.hdf5'.format(home),
-        #                   'HET': '{}/School/Research/HET_data/Cross_correlations/CCF_primary_total.hdf5'.format(home),
-        #                   'CHIRON': '{}/School/Research/CHIRON_data/Cross_correlations/CCF_primary_total.hdf5'.format(home),
-        #                   'IGRINS': '{}/School/Research/IGRINS_data/Cross_correlations/CCF_primary_total.hdf5'.format(home)}
-        #self._ccf_files = {'CHIRON': '{}/School/Research/CHIRON_data/Adam_Data/Cross_correlations/CCF.hdf5'.format(home)}
+
         self._interfaces = {inst: Analyze_CCF.CCF_Interface(self._ccf_files[inst]) for inst in self._ccf_files.keys()}
 
         # Variables for correcting measured --> actual temperatures
@@ -264,6 +348,16 @@ class Full_CCF_Interface(object):
     def list_stars(self, print2screen=False):
         """
         List all of the stars in all of the CCF interfaces
+
+        Parameters:
+        ===========
+        - print2screen:     bool
+                            Should we print the stars and dates to screen?
+
+        Returns:
+        =========
+        - star_list:        list
+                            A list of every star in the file, sorted by name.
         """
         stars = []
         for inst in self._interfaces.keys():
@@ -278,8 +372,19 @@ class Full_CCF_Interface(object):
     def get_observations(self, starname, print2screen=False):
         """
         Return a list of all observations of the given star
-        :param starname:
-        :return:
+
+        Parameters:
+        ===========
+        - starname:         string
+                            The name of the star to search. See self.list_stars() for the valid names.
+
+        - print2screen:     bool
+                            Should we print the stars and dates to screen?
+
+        Returns:
+        =========
+        - date_list:        list
+                            A sorted list of every date the given star was observed.
         """
         observations = []
         for instrument in self._interfaces.keys():
@@ -318,11 +423,28 @@ class Full_CCF_Interface(object):
 
     def get_ccfs(self, instrument, starname, date, addmode='simple'):
         """
-        Get a pandas dataframe with all the cross-correlation functions for the given instrument, star, and date
-        :param instrument:
-        :param starname:
-        :param date:
-        :return:
+        Get a pandas dataframe with all the cross-correlation functions
+        for the given instrument, star, and date
+
+        Parameters:
+        ===========
+        - instrument:   string
+                        The instrument name
+
+        - starname:     string
+                        The star name
+
+        - date:         string
+                        The observation date
+
+        - addmode:      string
+                        The way the CCFs were added. Options are typically
+                        'simple', 'ml', or 'dc'.
+
+        Returns:
+        ========
+        A pandas DataFrame with all the CCFs made for the given combination
+        of instrument, star, observation date, and addmode.
         """
         interface = self._interfaces[instrument]
         data = interface._compile_data(starname, date, addmode=addmode, read_ccf=True)
@@ -332,6 +454,35 @@ class Full_CCF_Interface(object):
         return data
 
     def make_summary_df(self, instrument, starname, date, addmode='simple', read_ccf=False):
+        """
+        Get a pandas dataframe with a summary of all the cross-correlation functions
+        for the given instrument, star, and date.
+
+        Parameters:
+        ===========
+        - instrument:   string
+                        The instrument name
+
+        - starname:     string
+                        The star name
+
+        - date:         string
+                        The observation date
+
+        - addmode:      string
+                        The way the CCFs were added. Options are typically
+                        'simple', 'ml', or 'dc'.
+
+        - read_ccf:     boolean
+                        Should we read in and include the cross-correlation function
+                        as well as the parameters? If True, it takes much longer
+                        and takes much more memory...
+
+        Returns:
+        ========
+        A pandas DataFrame with a summary of the CCF parameters
+        for the given combination of instrument, star, observation date, and addmode.
+        """
         if self._cache is not None:
             cache = self._cache
             data = cache.loc[(cache.Instrument == instrument) & (cache.Star == starname) & (cache.Date == date) & (cache.addmode == addmode)]
@@ -343,10 +494,23 @@ class Full_CCF_Interface(object):
 
 
     def load_ccf(self, instrument, name=None, star=None, date=None, T=None, feh=None, logg=None, vsini=None):
-        """ Load the ccf from the appropriate interface. Must give either name or every other parameter
+        """
+        Load the ccf from the appropriate interface.
 
-        name: The full path in the HDF5 file to the dataset. This is given in the 'name' column of the DataFrame
-              returned by make_summary_df or get_ccfs
+        Parameters:
+        ===========
+        - instrument:    string
+                         The instrument used to observe the star
+
+        - name:          string
+                         The full path in the HDF5 file to the dataset. This is given
+                         in the 'name' column of the DataFrame returned by
+                         `make_summary_df` or `get_ccfs`
+
+        Returns:
+        ========
+        vel, corr:       numpy.ndarrays
+                         The velocity and ccf power at that velocity.
         """
         interface = self._interfaces[instrument]
         if name is not None:
@@ -356,22 +520,46 @@ class Full_CCF_Interface(object):
         elif all([a is not None for a in [star, date, T, feh, logg, vsini]]):
             raise NotImplementedError
         else:
-            raise ValueError('Must give either the full HDF5 path to the dataset in the name keyword, or every other parameter')
+            raise ValueError('Must give either the full HDF5 path to the dataset '
+                             'in the name keyword, or every other parameter')
 
 
-    def get_measured_temperature(self, starname, date, Tmax, instrument=None, N=7, addmode='simple', feh=None, vsini=None):
+    def get_measured_temperature(self, starname, date, Tmax, instrument=None,
+                                 N=7, addmode='simple', feh=None, vsini=None):
         """
-        Get the measured temperature by doing a weighted sum over temperatures near the given one (which I find by hand)
-        :param starname: The name of the star
-        :param Tmax: The temperature to search near
-        :param date: The date the observation was taken
-        :param instrument: The instrument used (this function automatically finds it if not given)
-        :param N:  The number of temperature points to take
-        :param addmode: The way the individual order CCFs were co-added.
-        :param feh: The metallicity to use. If not given, it finds whatever gives the highest ccf peak.
-        :param vsini: The vsini to use. If not given, it finds whatever gives the highest ccf peak.
-        :return: A pandas DataFrame with the starname, date, instrument, and model parameters for the
-                 temperatures near the requested one
+        Get the measured temperature by doing a weighted sum over temperatures
+        near the given one (which I find by hand)
+
+        Parameters:
+        ===========
+        - starname:     string
+                        The name of the star
+
+        - date:         string
+                        The date the observation was taken
+
+        - Tmax:         float
+                        The temperature to search near
+
+        - instrument:   string
+                        The instrument used (this function automatically finds it if not given)
+
+        - N:            integer
+                        The number of temperature points to take
+
+        - addmode:      string
+                        The way the individual order CCFs were co-added.
+
+        - feh:          float
+                        The metallicity to use. If not given, it finds whatever gives the highest ccf peak.
+
+        - vsini:        float
+                        The vsini to use. If not given, it finds whatever gives the highest ccf peak.
+
+        Returns:
+        ========
+        A pandas DataFrame with the starname, date, instrument, and
+        model parameters for the temperatures near the requested one.
         """
         if instrument is None:
             # Find this star/date in all of the interfaces
@@ -411,7 +599,6 @@ class Full_CCF_Interface(object):
         #df['ccf_max'] = df.ccf.map(np.max) Already done now
 
         # Get the parameters and RV of the CCF with the highest peak (which has temperature = Tmax)
-        #print(df)
         requested = df.loc[df['T'] == Tmax]
         if feh is not None:
             requested = requested.loc[requested['[Fe/H]'] == feh]
@@ -541,24 +728,23 @@ class Full_CCF_Interface(object):
 
     def convert_measured_to_actual(self, df, cache=True):
         """
-        Convert a dataframe with measured values into actual temperatures using the MCMC sample calibrations
+        Convert a dataframe with measured values into actual
+        temperatures using the MCMC sample calibrations.
+
+        Parameters:
+        ===========
+        - df:     pandas DataFrame
+                  A dataframe with measured temperatures, such as generated by
+                  `self.get_measured_temperature()`
+
+        - cache:  boolean
+                  Store the intermediate results? Useful if you are converting
+                  lots of measurements.
         """
 
         # Correct for the systematics
         corrected = df.groupby(('Star')).apply(lambda d: self._correct(d, cache=cache))
 
-        """
-        # Correct the uncertainty
-        corrections = {}
-        for inst in df['Instrument'].unique():
-            for addmode in df['addmode'].unique():
-                d = {'instrument': inst,
-                     'directory': self._caldir[inst],
-                     'addmode': addmode}
-                corrections[(inst, addmode)] = float(np.loadtxt(self._uncertainty_scale.format(*d)))
-        corrected['Scaled_T_uperr'] = corrected.apply(lambda r: r['T_uperr'] * corrections[(r['Instrument'], r['addmode'])], axis=1)
-        corrected['Scaled_T_lowerr'] = corrected.apply(lambda r: r['T_lowerr'] * corrections[(r['Instrument'], r['addmode'])], axis=1)
-        """
 
         return corrected
 
@@ -567,7 +753,10 @@ class Full_CCF_Interface(object):
 
 
 class Kurucz_CCF_Interface(Full_CCF_Interface):
-    """ Same thing as above, but uses different CCF files """
+    """
+    Same thing as Full_CCF_Interface, but uses different CCF files on my system.
+    See the docstrings for Full_CCF_Interface for more details.
+    """
     def __init__(self, cache=False, update_cache=True, **cache_kwargs):
         # Instance variables to hold the ccf interfaces
         self._ccf_files = {'TS23': '{}/School/Research/McDonaldData/Cross_correlations/CCF_Kurucz.hdf5'.format(home),
@@ -604,7 +793,10 @@ class Kurucz_CCF_Interface(Full_CCF_Interface):
 
 class Primary_CCF_Interface(Full_CCF_Interface):
     """
-    Same as above, but for the primary star ccfs.
+    Same thing as Full_CCF_Interface, but uses different CCF files on my system.
+    See the docstrings for Full_CCF_Interface for more details. This version
+    uses Kurucz models, but does not remove the primary star spectrum so
+    they mostly give the primary star parameters.
     """
 
     def __init__(self, cache=False, update_cache=True, **cache_kwargs):
