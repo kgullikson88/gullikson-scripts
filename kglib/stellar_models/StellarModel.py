@@ -1,3 +1,5 @@
+from __future__ import print_function, absolute_import, division
+
 import os
 import sys
 import re
@@ -23,6 +25,7 @@ This code provides the GetModelList function.
 It is used in GenericSearch.py and SensitivityAnalysis.py
 """
 
+# Define file locations on my systems...
 if "darwin" in sys.platform:
     modeldir = "/Volumes/DATADRIVE/Stellar_Models/Sorted/Stellar/Vband/"
     HDF5_FILE = '/Volumes/DATADRIVE/PhoenixGrid/Search_Grid.hdf5'
@@ -42,16 +45,39 @@ def GetModelList(type='phoenix',
                  alpha=[0, 0.2],
                  model_directory=modeldir,
                  hdf5_file=HDF5_FILE):
-    """This function searches the model directory (hard coded in StellarModels.py) for stellar
-       models with the appropriate parameters
+    """
+    This function searches the model directory for stellar
+    models with the appropriate parameters
 
-    :param type: the type of models to get. Right now, only 'phoenix', 'kurucz', and 'hdf5' are implemented
-    :param metal: a list of the metallicities to include
-    :param logg: a list of the surface gravity values to include
-    :param temperature: a list of the temperatures to include
-    :param model_directory: The absolute path to the model directory (only used for type=phoenix or kurucz)
-    :param hdf5_file: The absolute path to the HDF5 file with the models (only used for type=hdf5)
-    :return: a list of filenames for the requested models
+    Parameters:
+    ===========
+    - type:                string
+                           The type of models to get. Right now, only 'phoenix',
+                           'kurucz', and 'hdf5' are implemented.
+
+    - metal:               iterable
+                           A list of the metallicities to include
+
+    - logg:                iterable
+                           A list of the surface gravity values to include
+
+    - temperature:         iterable
+                           A list of the temperatures to include
+
+    - alpha:               iterable
+                           A list of the [alpha/Fe] values to include
+
+    - model_directory:     string
+                           The absolute path to the model directory
+                           (only used for type=phoenix or kurucz)
+
+    - hdf5_file:           string
+                           The absolute path to the HDF5 file with the models
+                           (only used for type=hdf5)
+
+    Returns:
+    ========
+    A list of filenames for the requested models, or a list of parameters if type='hdf5'
     """
 
     # Error checking
@@ -92,11 +118,21 @@ def GetModelList(type='phoenix',
 
 
 def ClassifyModel(filename, type='phoenix'):
-    """Get the effective temperature, log(g), and [Fe/H] of a stellar model from the filename
+    """
+    Get the effective temperature, log(g), and [Fe/H] of a stellar model from the filename
 
-    :param filename:
-    :param type: Currently, only phoenix type files are supported
-    :return:
+    Parameters:
+    ===========
+    - filename:   string
+                  The filename to classify
+
+    - type:       string
+                  The type of file. Currently, only
+                  phoenix and kurucz type files are supported
+
+    Returns:
+    ========
+    temperature, surface gravity, and metallicity (all floats)
     """
     if not isinstance(filename, basestring):
         raise TypeError("Filename must be a string!")
@@ -130,19 +166,43 @@ def ClassifyModel(filename, type='phoenix'):
 
 def MakeModelDicts(model_list, vsini_values=[10, 20, 30, 40], type='phoenix',
                    vac2air=True, logspace=False, hdf5_file=HDF5_FILE, get_T_sens=False):
-    """This will take a list of models, and output two dictionaries that are
+    """
+    This will take a list of models, and output two dictionaries that are
     used by GenericSearch.py and Sensitivity.py
 
-    :param model_list: A list of model filenames
-    :param vsini_values: a list of vsini values to broaden the spectrum by (we do that later!)
-    :param type: the type of models. Currently, phoenix, kurucz, and hdf5 are implemented
-    :param vac2air: If true, assumes the model is in vacuum wavelengths and converts to air
-    :param logspace: If true, it will rebin the data to a constant log-spacing
-    :param hdf5_file: The absolute path to the HDF5 file with the models. Only used if type=hdf5
-    :param get_T_sens: Boolean flag for getting the temperature sensitivity.
-                       If true, it finds the derivative of each pixel dF/dT
-    :return: A dictionary containing the model with keys of temperature, gravity, metallicity, and vsini,
-             and another one with a processed flag with the same keys
+    Parameters:
+    ===========
+    - model_list:        iterable
+                         A list of model filenames
+
+    - vsini_values:     iterable
+                        A list of vsini values to broaden
+                        the spectrum by (we do that later!)
+
+    - type:             string
+                        The type of models. Currently,
+                        phoenix, kurucz, and hdf5 are implemented
+
+    - vac2air:          boolean
+                        If true, assumes the model is in
+                        vacuum wavelengths and converts to air
+
+    - logspace:         boolean
+                        If true, it will rebin the
+                        data to a constant log-spacing
+
+    - hdf5_file:        string
+                        The absolute path to the HDF5 file
+                        with the models. Only used if type=hdf5
+
+    - get_T_sens:       boolean
+                        Flag for getting the temperature sensitivity.
+                        If true, it finds the derivative of each pixel dF/dT
+
+    Returns:
+    ========
+     A dictionary containing the model with keys of temperature, gravity,
+     metallicity, and vsini,and another one with a processed flag with the same keys
     """
     vsini_values = np.atleast_1d(vsini_values)
     if type.lower() == 'phoenix':
@@ -150,7 +210,7 @@ def MakeModelDicts(model_list, vsini_values=[10, 20, 30, 40], type='phoenix',
         processed = defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(bool))))
         for fname in model_list:
             temp, gravity, metallicity = ClassifyModel(fname)
-            print "Reading in file %s" % fname
+            print("Reading in file %s" % fname)
             data = pandas.read_csv(fname,
                                    header=None,
                                    names=["wave", "flux"],
@@ -158,7 +218,6 @@ def MakeModelDicts(model_list, vsini_values=[10, 20, 30, 40], type='phoenix',
                                    sep=' ',
                                    skipinitialspace=True)
             x, y = data['wave'].values, data['flux'].values
-            # x, y = np.loadtxt(fname, usecols=(0, 1), unpack=True)
             if vac2air:
                 n = 1.0 + 2.735182e-4 + 131.4182 / x ** 2 + 2.76249e8 / x ** 4
                 x /= n
@@ -177,7 +236,7 @@ def MakeModelDicts(model_list, vsini_values=[10, 20, 30, 40], type='phoenix',
             lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(bool)))))
         for fname in model_list:
             temp, gravity, metallicity, a = ClassifyModel(fname)
-            print "Reading in file %s" % fname
+            print("Reading in file %s" % fname)
             data = pandas.read_csv(fname,
                                    header=None,
                                    names=["wave", "flux"],
@@ -185,7 +244,6 @@ def MakeModelDicts(model_list, vsini_values=[10, 20, 30, 40], type='phoenix',
                                    sep=' ',
                                    skipinitialspace=True)
             x, y = data['wave'].values, data['flux'].values
-            # x, y = np.loadtxt(fname, usecols=(0, 1), unpack=True)
             if vac2air:
                 n = 1.0 + 2.735182e-4 + 131.4182 / x ** 2 + 2.76249e8 / x ** 4
                 x /= n
@@ -251,10 +309,26 @@ def MakeModelDicts(model_list, vsini_values=[10, 20, 30, 40], type='phoenix',
 def get_model(mdict, Tvals, i, logg, metal, vsini, alpha=None, mode='same'):
     """
     Get the model with the requested parameters
-    :param mode: How to get the model. valid options:
-        - 'same': Get the model with the exact requested parameters.
-        - 'lower': Get model with the exact values of everything except temperature (find the next lowest temperature)
-        - 'upper': Get model with the exact values of everything except temperature (find the next highest temperature)
+
+    Parameters:
+    ===========
+    - mdict:     5x-nested dictionary, such as generated by MakeModelDicts
+                 The model dictionary
+    - Tvals:     List of floats
+                 A list of temperatures in the first level of mdict
+
+    - i:         integer
+                 The index of the requested temperature within the Tvals list
+
+    - logg, metal, vsini, alpha:  float
+                                  The parameter you want. These index into mdict.
+
+    - mode:      How to get the model. valid options:
+                    - 'same': Get the model with the exact requested parameters.
+                    - 'lower': Get model with the exact values of everything
+                       except temperature (find the next lowest temperature)
+                    - 'upper': Get model with the exact values of everything
+                       except temperature (find the next highest temperature)
     """
     if mode == 'same':
         if alpha is None:
@@ -286,6 +360,12 @@ def get_model(mdict, Tvals, i, logg, metal, vsini, alpha=None, mode='same'):
             except KeyError:
                 idx += 1
 
+
+####################################################################
+#         The next several classes/functions are from
+#                Ian Czekala's Starfish code
+#
+####################################################################
 
 
 class HDF5Interface:
@@ -696,6 +776,12 @@ class InterpolationError(Exception):
         self.msg = msg
 
 
+####################################################################
+#                       Back to my code.
+#
+####################################################################
+
+
 class KuruczGetter():
     def __init__(self, modeldir, rebin=True, T_min=7000, T_max=9000, logg_min=3.5, logg_max=4.5, metal_min=-0.5,
                  metal_max=0.5, alpha_min=0.0, alpha_max=0.4, wavemin=0, wavemax=np.inf, debug=False):
@@ -773,11 +859,11 @@ class KuruczGetter():
         metalvals = (np.array(metalvals) - self.metal_scale[0]) / self.metal_scale[1]
         if alpha_varies:
             alphavals = (np.array(alphavals) - self.alpha_scale[0]) / self.alpha_scale[1]
-        print self.T_scale
-        print self.metal_scale
-        print self.logg_scale
+        print(self.T_scale)
+        print(self.metal_scale)
+        print(self.logg_scale)
         if alpha_varies:
-            print self.alpha_scale
+            print(self.alpha_scale)
 
         # Make the grid and interpolator instances
         if alpha_varies:
@@ -816,7 +902,7 @@ class KuruczGetter():
                             alpha_min <= alpha <= alpha_max):
 
                 if self.debug:
-                    print "Reading in file {:s}".format(fname)
+                    print("Reading in file {:s}".format(fname))
                 data = pandas.read_csv("{:s}/{:s}".format(modeldir, fname),
                                        header=None,
                                        names=["wave", "norm"],
@@ -871,7 +957,7 @@ class KuruczGetter():
 
         # Scale the requested values
         if self.debug:
-            print T, logg, metal, alpha, vsini
+            print(T, logg, metal, alpha, vsini)
         T = (T - self.T_scale[0]) / self.T_scale[1]
         logg = (logg - self.logg_scale[0]) / self.logg_scale[1]
         metal = (metal - self.metal_scale[0]) / self.metal_scale[1]
@@ -928,11 +1014,7 @@ class KuruczGetter():
             return model.y
 
 
-"""
-=======================================================================
-=======================================================================
-=======================================================================
-"""
+
 
 
 class PhoenixGetter():
@@ -1010,7 +1092,7 @@ class PhoenixGetter():
                         logg == 4.5):
 
                 if self.debug:
-                    print "Reading in file {:s}".format(fname)
+                    print("Reading in file {:s}".format(fname))
                 data = pandas.read_csv("{:s}{:s}".format(modeldir, fname),
                                        header=None,
                                        names=["wave", "flux", "continuum"],
@@ -1081,8 +1163,8 @@ class PhoenixGetter():
         else:
             if self.debug:
                 warnings.warn("The requested parameters fall outside the model grid. Results may be unreliable!")
-            print T, T_min, T_max
-            print metal, metal_min, metal_max
+            print(T, T_min, T_max)
+            print(metal, metal_min, metal_max)
             y = self.NN_interpolator(input_list)
 
         # Test to make sure the result is valid. If the requested point is
