@@ -1,11 +1,12 @@
-import pylab
+from __future__ import print_function, division, absolute_import
+
 import numpy as np
 from astropy import units, constants
 from scipy.interpolate import UnivariateSpline
 
 from kglib.utils import DataStructures
 from kglib.utils.FittingUtilities import Continuum as FindContinuum
-import warnings
+import logging
 
 
 pi = np.pi
@@ -13,7 +14,7 @@ pi = np.pi
 
 def CombineIntervals(intervals, overlap=0):
     iteration = 0
-    print "\n\n"
+    print('\n\n')
     for interval in intervals:
         lastindex = interval.x.size - overlap
 
@@ -111,7 +112,7 @@ def Broaden(model, vsini, intervalsize=50.0, beta=1.0, linear=False, findcont=Fa
         profile = 1.0 / (zeta * (1 + 2 * beta / 3.)) * (
         2 / np.pi * np.sqrt(1 - x ** 2) + 0.5 * beta * ( 1 - x ** 2  ) )
         if profile.size < 10:
-            warnings.warn("Warning! Profile size too small: %i\nNot broadening!" % (profile.size))
+            logging.warn("Warning! Profile size too small: %i\nNot broadening!" % (profile.size))
             intervals.append(interval)
             firstindex = lastindex - 2 * profile.size
             continue
@@ -188,9 +189,9 @@ def Broaden2(model, vsini, intervalsize=50.0, epsilon=0.5, linear=False, findcon
         if not findcont:
             model.cont = cont_fcn(model.x)
         else:
-            model.cont = FittingUtilities.Continuum(model.x, model.y, lowreject=1.5, highreject=10)
+            model.cont = FindContinuum(model.x, model.y, lowreject=1.5, highreject=10)
     elif findcont:
-        model.cont = FittingUtilities.Continuum(model.x, model.y, lowreject=1.5, highreject=10)
+        model.cont = FindContinuum(model.x, model.y, lowreject=1.5, highreject=10)
 
 
     #Convert to velocity space
@@ -224,29 +225,3 @@ def Broaden2(model, vsini, intervalsize=50.0, epsilon=0.5, linear=False, findcon
     return model
 
 
-def Test_fcn(model):
-    model_fcn = UnivariateSpline(model.x, model.y, s=0)
-    cont_fcn = UnivariateSpline(model.x, model.cont, s=0)
-
-    print model_fcn(np.median(model.x))
-
-
-if __name__ == "__main__":
-    #filename = sys.argv[1]
-    #SpT = sys.argv[2]
-    #vsini = float(sys.argv[3]) #MUST BE GIVEN IN KM S^1
-
-    filename = "BG19000g400v2.vis.7"
-    fulldata = ReadFile(filename)
-    left = np.searchsorted(fulldata.x, 850)
-    right = np.searchsorted(fulldata.x, 950)
-    data = DataStructures.xypoint(right - left + 1)
-    data.x = fulldata.x[left:right]
-    data.y = fulldata.y[left:right]
-    data.cont = fulldata.cont[left:right]
-    spectrum = Broaden(data, 150 * units.km.to(units.cm))
-    pylab.plot(spectrum.x, spectrum.y / spectrum.cont)
-    pylab.show()
-    #outfilename = "Broadened_" + SpT + "_v%.0f.dat" %(vsini)
-    #print "Outputting to ", outfilename
-    #np.savetxt(outfilename, np.transpose((spectrum.x, spectrum.y/spectrum.cont)), fmt='%.8f\t%.8g')

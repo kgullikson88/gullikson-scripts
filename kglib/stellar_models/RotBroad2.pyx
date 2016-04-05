@@ -1,12 +1,13 @@
+from __future__ import print_function, division
+
 import numpy as np
-from scipy.interpolate import InterpolatedUnivariateSpline
 cimport numpy as np
 cimport cython
 from libc.math cimport sqrt
 from astropy import constants, units
 from kglib.utils import FittingUtilities
 from scipy.signal import fftconvolve
-import warnings
+import logging
 
 DTYPE = np.float64
 ctypedef np.float64_t DTYPE_t
@@ -72,13 +73,31 @@ cdef np.ndarray[DTYPE_t, ndim=1] convolve(np.ndarray[DTYPE_t, ndim=1] y,
   This is the wrapper function. The user should call this!
 """
 
-def Broaden_old(model, vsini, epsilon=0.5, linear=False, findcont=False):
+def Broaden_cython(model, vsini, epsilon=0.5, linear=False, findcont=False):
   """
-    model:           xypoint instance with the data (or model) to be broadened
-    vsini:           the velocity (times sin(i) ) of the star, in cm/s
-    epsilon:          Linear limb darkening. I(u) = 1-epsilon + epsilon*u
-    linear:          flag for if the x-spacing is already linear. If true, we don't need to linearize
-    findcont:        flag to decide if the continuum needs to be found
+  Rotationally broaden the model spectrum to the given vsini
+
+    Parameters:
+    ===========
+    - model:       kglib.utils.DataStructures.xypoint instance
+                   The model to be broadened
+
+    - vsini:       float
+                   The velocity (times sin(i) ) of the star, in cm/s
+
+    - epsilon:     float from 0 to 1
+                   Linear limb darkening. I(u) = 1-epsilon + epsilon*u
+
+    - linear:      boolean
+                   Flag for if the x-spacing is already linear in log-spacing.
+                   If true, we don't need to linearize
+
+    - findcont:    boolean
+                   Flag to decide if the continuum needs to be found
+
+    Returns:
+    ========
+    Broadened model spectrum.
   """
 
   if not linear:
@@ -107,11 +126,30 @@ def Broaden_old(model, vsini, epsilon=0.5, linear=False, findcont=False):
 
 def Broaden(model, vsini, epsilon=0.5, linear=False, findcont=False):
     """
-      model:           xypoint instance with the data (or model) to be broadened
-      vsini:           the velocity (times sin(i) ) of the star, in cm/s
-      epsilon:          Linear limb darkening. I(u) = 1-epsilon + epsilon*u
-      linear:          flag for if the x-spacing is already linear in log-spacing. If true, we don't need to linearize
-      findcont:        flag to decide if the continuum needs to be found
+    Rotationally broaden the model spectrum to the given vsini
+
+    Parameters:
+    ===========
+    - model:       kglib.utils.DataStructures.xypoint instance
+                   The model to be broadened
+
+    - vsini:       float
+                   The velocity (times sin(i) ) of the star, in cm/s
+
+    - epsilon:     float from 0 to 1
+                   Linear limb darkening. I(u) = 1-epsilon + epsilon*u
+
+    - linear:      boolean
+                   Flag for if the x-spacing is already linear in log-spacing.
+                   If true, we don't need to linearize
+
+    - findcont:    boolean
+                   Flag to decide if the continuum needs to be found
+
+    Returns:
+    ========
+    Broadened model spectrum. Warning! The wavelength axis is changed from the original
+    if linear=False!
     """
     c = constants.c.cgs.value
 
@@ -130,9 +168,9 @@ def Broaden(model, vsini, epsilon=0.5, linear=False, findcont=False):
     lim = vsini/c
     if lim < dx:
         #vsini is too small. Don't broaden
-        warnings.warn("vsini too small ({}). Not broadening!".format(vsini))
+        logging.warn("vsini too small ({}). Not broadening!".format(vsini))
         return model.copy()
-    #d_logx = np.arange(-lim, lim, dx*np.log10(200.0))
+
     d_logx = np.arange(0.0, lim, dx)
     d_logx = np.r_[-d_logx[::-1][:-1], d_logx]
     alpha = 1.0 - (d_logx/lim)**2
