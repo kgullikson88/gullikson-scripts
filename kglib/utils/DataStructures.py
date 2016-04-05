@@ -15,6 +15,7 @@
     along with TelFit.  If not, see <http://opensource.org/licenses/MIT>.
 
 """
+from __future__ import print_function, division, absolute_import
 
 import numpy as np
 from astropy import units as u
@@ -109,9 +110,9 @@ class xypoint:
     def toarray(self, norm=False):
         """
         Turns the data structure into a multidimensional np array
-        If norm == True, it will have shape self.size(), 2 and the y
+        If norm == True, it will have shape (self.size(), 2) and the y
           axis will be divided by the continuum axis
-        Otherwise, it will have shape self.size(), 4
+        Otherwise, it will have shape (self.size(), 4)
         """
         if norm:
             return np.array((self.x, self.y / self.cont)).transpose()
@@ -136,27 +137,38 @@ class xypoint:
         return xypoint(x=x, y=y, cont=cont, err=err), xunits, yunits
 
 
-"""
-Function to combine a list of xypoints into a single
-  xypoint. Useful for combining several orders/chips
-  or for coadding spectra
 
-Warning! This function is basically un-tested! It is NOT used
-in TelFit!
-  
-  ***Optional keywords***
-  snr: the spectra will be weighted by the signal-to-noise ratio
-       before adding
-  xspacing: the x-spacing in the final array
-  numpoints: the number of points in the final array. If neither
-             numpoints nor xspacing is given, the x-spacing in the
-             final array will be determined by averaging the spacing
-             in each of the xypoints.
-  interp_order: the interpolation order. Default is cubic
-"""
 
 
 def CombineXYpoints(xypts, snr=None, xspacing=None, numpoints=None, interp_order=3):
+    """
+    Function to combine a list of xypoints into a single
+      xypoint. Useful for combining several orders/chips
+      or for coadding spectra
+
+    Warning! This function is very minimally tested!
+
+    Parameters:
+    ===========
+     - xypts:            list of xypoint objects
+                         A list of xypoints to combine. Usually this would be echelle orders.
+
+     - snr:              list
+                         The spectra will be weighted by the signal-to-noise ratio
+                         before adding. Must have the same length as xypts!
+
+     - xspacing:         float
+                         The x-spacing in the final array
+
+     - numpoints:        integer
+                         The number of points in the final array. If neither
+                         numpoints nor xspacing is given, the x-spacing in the
+                         final array will be determined by averaging the spacing
+                         in each of the xypoints.
+
+     - interp_order:     integer
+                         The interpolation order. Default is cubic
+    """
     from scipy.interpolate import InterpolatedUnivariateSpline
 
     if snr == None or type(snr) != list:
@@ -183,7 +195,6 @@ def CombineXYpoints(xypts, snr=None, xspacing=None, numpoints=None, interp_order
 
     full_array = xypoint(x=x, y=np.ones(x.size))
     numvals = np.ones(x.size)  #The number of arrays each x point is in
-    normalization = 0.0
     for xypt in xypts:
         interpolator = InterpolatedUnivariateSpline(xypt.x, xypt.y / xypt.cont, k=interp_order)
         left = np.searchsorted(full_array.x, xypt.x[0])
