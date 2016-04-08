@@ -51,7 +51,50 @@ def ensure_dir(f):
         os.makedirs(d)
 
 
-def SmoothData(order, windowsize=91, smoothorder=5, lowreject=3, highreject=3, numiters=10, expand=0, normalize=True):
+def SmoothData(order, windowsize=91, smoothorder=5, lowreject=3, highreject=3,
+               numiters=10, expand=0, normalize=True):
+    """
+    Denoise the data, and smooth the result with an iterative savitzy-golay filter.
+    Returns the smoothed result, which can be subtracted from the original for
+    unsharp-masking.
+
+    Parameters:
+    ===========
+    - order:         kglib.utils.DataStructures.xypoint instance
+                     The data to smooth. The variable is called 'order'
+                     because I deal with echelle orders.
+
+    - windowsize:    odd integer
+                     The size of the savitzy-golay window, in pixels
+
+    - smoothorder:   integer
+                     The order of the savitzy-golay filter. Higher
+                     gives a closer representation of the data, but can
+                     go crazy if you go too high.
+
+    - lowreject:     integer
+                     In each iteration, reject pixels less than lowreject
+                     standard deviations below the fitted line.
+
+    - highreject:    integer
+                     In each iteration, reject pixels more than highreject
+                     standard deviations above the fitted line.
+
+    - numiters:      integer
+                     The number of rejection iterations to do
+
+    - expand:        integer
+                     The number of pixels to the left and right of a bad
+                     pixel (which is defined by lowreject and highreject)
+                     that we will reject.
+
+    - normalize:     boolean
+                     If true, the output has a maximum value of 1.0
+
+    Returns:
+    ========
+    kglib.utils.DataStructures.xypoint instance with the smoothed data.
+    """
     denoised = Denoise(order.copy())
     denoised.y = FittingUtilities.Iterative_SV(denoised.y,
                                                windowsize,
@@ -67,13 +110,32 @@ def SmoothData(order, windowsize=91, smoothorder=5, lowreject=3, highreject=3, n
 
 def astropy_smooth(data, vel, linearize=False, kernel=convolution.Gaussian1DKernel, **kern_args):
     """
-    Smooth using an astropy filter
-    :param data: An xypoint with the data to smooth
-    :param vel: The velocity scale to smooth out. Can either by an astropy quantities or a float in km/s
-    :param linearize: If True, we will put the data in a constant log-wavelength spacing grid before smoothing.
-    :param kernel: The astropy kernel to use for smoothing
-    :param kern_args: Kernel arguments beyond width
-    :return: A smoothed version of the data, on the same wavelength grid as the data
+    Smooth using a gaussian filter, using astropy.
+
+    Parameters:
+    ===========
+    - data:          kglib.utils.DataStructures.xypoint instance
+                     The data to smooth.
+
+    - vel:           float
+                     The velocity scale to smooth out.
+                     Can either by an astropy quantity or a float in km/s
+
+    - linearize:     boolean
+                     If True, we will put the data in a constant
+                     log-wavelength spacing grid before smoothing.
+                     The output has the same spacing as the input
+                     regardless of this variable.
+
+    - kernel:        astropy.convolution kernel
+                     The astropy kernel to use. The default is the
+                     Gaussian1DKernel.
+
+    - kern_args:     Additional kernel arguments beyond width
+
+    Returns:
+    ========
+    A smoothed version of the data, on the same wavelength grid as the data
     """
 
     if linearize:
@@ -88,8 +150,6 @@ def astropy_smooth(data, vel, linearize=False, kernel=convolution.Gaussian1DKern
     if not isinstance(vel, u.quantity.Quantity):
         vel *= u.km / u.second
 
-    # featuresize = (np.median(data.x) * vel / constants.c).decompose().value
-    #dlam = data.x[1] - data.x[0]
     featuresize = (vel / constants.c).decompose().value
     dlam = np.log(data.x[1] / data.x[0])
     Npix = featuresize / dlam
@@ -105,6 +165,9 @@ def astropy_smooth(data, vel, linearize=False, kernel=convolution.Gaussian1DKern
 
 
 def roundodd(num):
+    """
+    Round the given number to the nearest odd number.
+    """
     rounded = round(num)
     if rounded % 2 != 0:
         return rounded
@@ -118,6 +181,8 @@ def roundodd(num):
 
 def BinomialErrors_old(nobs, Nsamp, alpha=0.16):
     """
+    DO NOT USE THIS! Use BinomialErrors instead!
+
     One sided confidence interval for a binomial test.
 
     If after Nsamp trials we obtain nobs
@@ -130,18 +195,47 @@ def BinomialErrors_old(nobs, Nsamp, alpha=0.16):
     Code stolen shamelessly from stackoverflow:
     http://stackoverflow.com/questions/13059011/is-there-any-python-function-library-for-calculate-binomial-confidence-intervals
     """
+    warnings.warn('Use BinomialErrors instead!', DeprecationWarning)
     from scipy.stats import binom
 
     p0 = float(nobs) / float(Nsamp)
-    to_minimise = lambda c: binom.cdf(nobs, Nsamp, c) - alpha
     upper_errfcn = lambda c: binom.cdf(nobs, Nsamp, c) - alpha
     lower_errfcn = lambda c: binom.cdf(nobs, Nsamp, c) - (1.0 - alpha)
     return p0, bisect(lower_errfcn, 0, 1), bisect(upper_errfcn, 0, 1)
+
 
 def BinomialErrors(nobs, Nsamp, alpha=0.05, method='jeffrey'):
     """
     This is basically just statsmodels.stats.proportion.proportion_confint
     with a different default method. It also returns the proportion nobs/Nsamp
+
+    Parameters:
+    ===========
+    - nobs:     integer
+                The number of "successes"
+
+    - Nsamp:    integer
+                The total number of trials. Should be >= nobs.
+
+    - alpha:    float in (0, 1)
+                Probability that the true value lies outside the
+                resulting error (or something like that).
+                alpha=0.05 is about 2-sigma.
+
+    - method:   string
+                The calculation method. This is just passed to
+                `statsmodels.stats.proportion.proportion_confint`
+
+    Returns:
+    ========
+    - prob:     float
+                The estimate for the probability. prob = nobs / Nsamp
+
+    - low:      float
+                The lower bound on the probability
+
+    - high:     float
+                The upper bound on the probability
     """
 
     low, high = proportion_confint(nobs, Nsamp, method=method, alpha=alpha)
@@ -200,6 +294,47 @@ def ReadFits(datafile, errors=False, extensions=False, x=None, y=None, cont=None
     binary tables, with the table names given by the x,y,cont, and errors keywords.
 
     See ReadExtensionFits for a convenience function that assumes my standard names
+
+    Parameters:
+    ===========
+    - datafile:       string
+                      The name of the file to read
+
+    - errors:         boolean, integer, or string
+                      If False, indicates there are no errors in the datafile
+                      If an integer AND extensions = False, indicates the index
+                      that the errors are found in.
+                      If a string AND extenstions = True, indicates the name
+                      of the error field in the binary table.
+
+    - extensions:     boolean
+                      Is the data stored in several fits extensions? If not,
+                      we assume it is in multispec format
+
+    - x:              string
+                      The name of the field with the x-coordinate (wavelength, etc).
+                      Ignored if extensions = False
+
+    - y:              string
+                      The name of the field with the y-coordinate (flux, etc).
+                      Ignored if extensions = False
+
+    - cont:           string
+                      The name of the field with the continuum estimate.
+                      Ignored if extensions = False
+
+    - return_aps:     boolean
+                      Return the aperture wavelength fields as well as the
+                      extracted orders. The wavelength fields define the
+                      wavelengths in multispec format. Ignored if extensions = True.
+
+    - debug:          boolean
+                      Print some extra information to screen
+
+    Returns:
+    ========
+    A list of kglib.utils.DataStructures.xypoint instances with the data for each
+    echelle order.
     """
     if debug:
         print( "Reading in file %s: " % datafile)
@@ -299,23 +434,43 @@ def ReadFits(datafile, errors=False, extensions=False, x=None, y=None, cont=None
 
 def OutputFitsFileExtensions(column_dicts, template, outfilename, mode="append", headers_info=[], primary_header={}):
     """
-    Function to output a fits file
-    column_dict is a dictionary where the key is the name of the column
-       and the value is a np array with the data. Example of a column
-       would be the wavelength or flux at each pixel
-    template is the filename of the template fits file. The header will
-       be taken from this file and used as the main header
-    mode determines how the outputted file is made. Append will just add
-       a fits extension to the existing file (and then save it as outfilename)
-       "new" mode will create a new fits file.
-    header_info takes a list of lists. Each sub-list should have size 2 where the first element is the name of the new keyword, and the second element is the corresponding value. A 3rd element may be added as a comment
-    primary_header takes a dictionary with keywords to insert into the primary fits header (and not each extension)
+    Function to output a fits file in my standard format.
+
+    Parameters:
+    ===========
+    - column_dicts:        list of dictionaries
+                           Maps the name of the column to a numpy.ndarray with
+                           the data. Example of a column would be the wavelength
+                           or flux at each pixel. Each list item should describe
+                           a different echelle order.
+
+    - template             string
+                           The filename of the template fits file. The header will
+                           be taken from this file and used as the main header of
+                           the new file.
+
+    - mode                 string
+                           Determines how the outputted file is made. mode = "append"
+                           will just add a fits extension to the existing file
+                           (and then save it as outfilename). mode = "new" will
+                           create an entirely new fits file.
+
+    - header_info          list of lists
+                           Each sub-list should have size 2 where the first element
+                           is the name of the new keyword, and the second element
+                           is the corresponding value. A 3rd element may be added as
+                           a comment. The length of the top-level list should be the
+                           same as the length of column_dicts. This header information
+                           gets put into the extension headers, so can contain stuff
+                           relevant for that echelle order only.
+
+    - primary_header       dictionary
+                           Keywords to insert into the primary fits header. The key
+                           will be the header key, and the value will be the header
+                           value.
     """
 
-    # Get header from template. Use this in the new file
-    if mode == "new":
-        header = pyfits.getheader(template)
-
+    # Do some error checking.
     if not isinstance(column_dicts, list):
         column_dicts = [column_dicts, ]
     if len(headers_info) < len(column_dicts):
@@ -328,6 +483,8 @@ def OutputFitsFileExtensions(column_dicts, template, outfilename, mode="append",
         header = pyfits.getheader(template)
         pri_hdu = pyfits.PrimaryHDU(header=header)
         hdulist = pyfits.HDUList([pri_hdu, ])
+    else:
+        raise ValueError('Unknown file creation mode ({})! Use either "append" or "new"'.format(mode))
 
     if len(primary_header.keys()) > 0:
         for key in primary_header:
@@ -361,9 +518,26 @@ def OutputFitsFileExtensions(column_dicts, template, outfilename, mode="append",
 def LowPassFilter(data, vel, width=5, linearize=False):
     """
     Function to apply a low-pass filter to data.
-      Data must be in an xypoint container, and have linear wavelength spacing
-      vel is the width of the features you want to remove, in velocity space (in cm/s)
-      width is how long it takes the filter to cut off, in units of wavenumber
+
+    Parameters:
+    ===========
+    - data:        kglib.utils.DataStructures.xypoint instance
+                   The data to filter.
+
+    - vel:         float
+                   The width of the features to smooth out, in velocity space (in cm/s).
+
+    - width:       integer
+                   How long it takes the filter to cut off, in units of wavenumber.
+
+    - linearize:   boolean
+                   Do we need to resample the data to a constant wavelength spacing
+                   before filtering? Set to True if the data is unevenly sampled.
+
+    Returns:
+    ========
+    If linearize = True:  Returns a numpy.ndarray with the new x-axis, and the filtered data
+    Otherwise:  Returns just a numpy.ndarray with the filtered data.
     """
 
     if linearize:
@@ -381,11 +555,8 @@ def LowPassFilter(data, vel, width=5, linearize=False):
     # Figure out cutoff frequency from the velocity.
     featuresize = data.x.mean() * vel / constants.c.cgs.value  # vel MUST be given in units of cm
     dlam = data.x[1] - data.x[0]  # data.x MUST have constant x-spacing
-    Npix = featuresize / dlam
-    cutoff_hz = 1.0 / Npix  # Cutoff frequency of the filter
     cutoff_hz = 1.0 / featuresize
 
-    nsamples = data.size()
     sample_rate = 1.0 / dlam
     nyq_rate = sample_rate / 2.0  # The Nyquist rate of the signal.
     width /= nyq_rate
@@ -418,7 +589,21 @@ def LowPassFilter(data, vel, width=5, linearize=False):
 def IterativeLowPass(data, vel, numiter=100, lowreject=3, highreject=3, width=5, linearize=False):
     """
     An iterative version of LowPassFilter.
-    It will ignore outliers in the low pass filter
+    It will ignore outliers in the low pass filter. New parameters that are
+    not described in the docstring fro LowPassFilter are:
+
+    Parameters:
+    ===========
+    - numiter:       integer
+                     The maximum number of iterations to take
+
+    - lowreject:     integer
+                     How many sigma below the current filtered curve do we
+                     count as bad and ignore in the next iteration?
+
+    - highreject:    integer
+                     How many sigma above the current filtered curve do we
+                     count as bad and ignore in the next iteration?
     """
 
     datacopy = data.copy()
@@ -457,9 +642,26 @@ def IterativeLowPass(data, vel, numiter=100, lowreject=3, highreject=3, width=5,
 def HighPassFilter(data, vel, width=5, linearize=False):
     """
     Function to apply a high-pass filter to data.
-      Data must be in an xypoint container, and have linear wavelength spacing
-      vel is the width of the features you want to remove, in velocity space (in cm/s)
-      width is how long it takes the filter to cut off, in units of wavenumber
+
+    Parameters:
+    ===========
+    - data:        kglib.utils.DataStructures.xypoint instance
+                   The data to filter.
+
+    - vel:         float
+                   The width of the features to smooth out, in velocity space (in cm/s).
+
+    - width:       integer
+                   How long it takes the filter to cut off, in units of wavenumber.
+
+    - linearize:   boolean
+                   Do we need to resample the data to a constant wavelength spacing
+                   before filtering? Set to True if the data is unevenly sampled.
+
+    Returns:
+    ========
+    If linearize = True:  Returns a numpy.ndarray with the new x-axis, and the filtered data
+    Otherwise:  Returns just a numpy.ndarray with the filtered data.
     """
 
     if linearize:
@@ -526,6 +728,8 @@ if mlpy_import:
         http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=4607982&tag=1
 
         with title "Astronomical Spectra Denoising Based on Simplifed SURE-LET Wavelet Thresholding"
+
+        The data should be a kglib.utils.DataStructures.xypoint instance.
         """
         y, boolarr = mlpy.wavelet.pad(data.y)
         WC = mlpy.wavelet.dwt(y, 'd', 10, 0)
@@ -559,10 +763,12 @@ if mlpy_import:
 
     # Kept for legacy support, since I was using Denoise3 in several codes in the past.
     def Denoise3(data):
+        warnings.warn('Use Denoise function instead!', DeprecationWarning)
         return Denoise(data)
 
 
 def Gauss(x, mu, sigma, amp=1):
+    """ Return a gaussian at location x, with parameters mu, sigma, and amp """
     return amp * np.exp(-(x - mu) ** 2 / (2 * sigma ** 2))
 
 
@@ -573,7 +779,7 @@ def FindOutliers(data, numsiglow=6, numsighigh=3, numiters=10, expand=0):
     below the mean, or numsighigh standard deviations above
     the mean. Returns the index of the outliers in the data.
 
-    Data should be an xypoint instance
+    Data should be an kglib.utils.DataStructures.xypoint instance
     The expand keyword will expand the rejected points some number
       from every rejected point.
     """
@@ -605,17 +811,16 @@ def FindOutliers(data, numsiglow=6, numsighigh=3, numiters=10, expand=0):
 
 
 def IsListlike(arg):
-    """This function just test to check if the object acts like a list
-
-    :param arg:
-    :return:
     """
-    if isinstance(arg, basestring):  # Python 3: isinstance(arg, str)
+    This function just tests to check if the object acts like a list
+    """
+    from six import string_types
+
+    if isinstance(arg, string_types):
         return False
     try:
-        tmp = [x for x in arg]
+        _ = [x for x in arg]
         return True
-        # return '<' + ", ".join(srepr(x) for x in arg) + '>'
     except TypeError:  # catch when for loop fails
         return False
 
@@ -623,9 +828,8 @@ def IsListlike(arg):
 
 def mad(arr):
     """
-    Median average deviation
-    :param arr: A list-like object
-    :return:
+    Median average deviation.
+    The parameter `arr` is any list-like object (list, tuple, numpy.ndarray)
     """
     if not IsListlike(arr):
         raise ValueError("The input to mad must be a list-like object!")
@@ -637,9 +841,16 @@ def mad(arr):
 
 def split_radec(radec, to_float=False):
     """
-    Splits an RA/DEC string into separate RA and DEC strings
-    :param radec: The string of the form "00 10 02.20293 +11 08 44.9280"
-    :keyword to_float: If true, it will convert the RA and DEC values to floats
+    Splits an RA/DEC string into separate RA and DEC strings.
+
+    Parameters:
+    ===========
+    - radec:    string
+                Has the form return by simbad queries: "00 10 02.20293 +11 08 44.9280"
+
+    - to_float: boolean
+                If True, it will convert the RA and DEC values to floats.
+                Otherwise, it leaves them in hexadecimal
     """
     delim = '+' if '+' in radec else '-'
     segments = radec.split(delim)
@@ -653,23 +864,41 @@ def split_radec(radec, to_float=False):
     return ra, dec
 
 
-def radec2altaz(ra, dec, obstime, lat=None, long=None, debug=False):
+def radec2altaz(ra, dec, obstime, lat=None, lon=None, debug=False):
     """
     calculates the altitude and azimuth, given an ra, dec, time, and observatory location
-    :param ra: right ascension of the target (in degrees)
-    :param dec: declination of the target (in degrees)
-    :param obstime: an astropy.time.Time object containing the time of the observation.
-                    Can also contain the observatory location
-    :param lat: The latitude of the observatory. Not needed if given in the obstime object
-    :param long: The longitude of the observatory. Not needed if given in the obstime object
-    :return:
+
+    Parameters:
+    ===========
+    - ra:        float
+                 The right ascension of the target (in degrees)
+
+    - dec:       float
+                 The declination of the target (in degrees)
+
+    - obstime:   astropy.time.Time object
+                 Contains the time of the observation.
+                 Can also contain the observatory location if
+                 lat and lon are not given.
+
+    - lat:       float
+                 The latitude of the observatory, in degrees.
+                 Not needed if given in the obstime object
+
+    - lon:      float
+                 The longitude of the observatory, in degrees.
+                 Not needed if given in the obstime object
+
+    Returns:
+    ========
+    The altitude and azimuth of the object, both in degrees.
     """
 
     if lat is None:
         lat = obstime.lat.degree
-    if long is None:
-        long = obstime.lon.degree
-    obstime = Time(obstime.isot, format='isot', scale='utc', location=(long, lat))
+    if lon is None:
+        lon = obstime.lon.degree
+    obstime = Time(obstime.isot, format='isot', scale='utc', location=(lon, lat))
 
     # Find the number of days since J2000
     j2000 = Time("2000-01-01T12:00:00.0", format='isot', scale='utc')
@@ -691,9 +920,7 @@ def radec2altaz(ra, dec, obstime, lat=None, long=None, debug=False):
 
     # convert everything to radians
     dec *= np.pi / 180.0
-    ra *= np.pi / 180.0
     lat *= np.pi / 180.0
-    long *= np.pi / 180.0
     HA *= np.pi / 180.0
 
     # Calculate the altitude
@@ -713,6 +940,9 @@ def radec2altaz(ra, dec, obstime, lat=None, long=None, debug=False):
 
 
 def safe_convert(s, default=0):
+    """
+    Converts something to a float. If an error occurs, returns the default value.
+    """
     try:
         v = float(s)
     except ValueError:
@@ -722,10 +952,20 @@ def safe_convert(s, default=0):
 
 def convert_hex_string(string, delimiter=":", debug=False):
     """
-    Converts a hex coordinate string to a decimal
-    :param string: The string to convert
-    :param delimiter: The delimiter
-    :return: the decimal number
+    Converts a hexadecimal coordinate string to a decimal
+
+    Parameters:
+    ===========
+    - string:      string
+                   The hex string to convert
+
+    - delimiter:   string
+                   The delimiter between hours, minutes, and seconds in
+                   the hex string
+
+    Returns:
+    ========
+    The decimal number equivalent to the input hex string.
     """
     if debug:
         print('Parsing hex string {}'.format(string))
@@ -734,9 +974,27 @@ def convert_hex_string(string, delimiter=":", debug=False):
     return s * (abs(safe_convert(segments[0])) + safe_convert(segments[1]) / 60.0 + safe_convert(segments[2]) / 3600.0)
 
 
-def convert_to_hex(val, delimiter=':', force_sign=False, debug=False):
+def convert_to_hex(val, delimiter=':', force_sign=False):
     """
     Converts a numerical value into a hexidecimal string
+
+    Parameters:
+    ===========
+    - val:           float
+                     The decimal number to convert to hex.
+
+    - delimiter:     string
+                     The delimiter between hours, minutes, and seconds
+                     in the output hex string.
+
+    - force_sign:    boolean
+                     Include the sign of the string on the output,
+                     even if positive? Usually, you will set this to
+                     False for RA values and True for DEC
+
+    Returns:
+    ========
+    A hexadecimal representation of the input value.
     """
     s = np.sign(val)
     s_factor = 1 if s > 0 else -1
@@ -745,7 +1003,6 @@ def convert_to_hex(val, delimiter=':', force_sign=False, debug=False):
     minute = int((val  - degree)*60)
     second = (val - degree - minute/60.0)*3600.
     if degree == 0 and s_factor < 0:
-        deg_str = '-00'
         return '-00{2:s}{0:02d}{2:s}{1:.2f}'.format(minute, second, delimiter)
     elif force_sign or s_factor < 0:
         deg_str = '{:+03d}'.format(degree * s_factor)
@@ -754,23 +1011,49 @@ def convert_to_hex(val, delimiter=':', force_sign=False, debug=False):
     return '{0:s}{3:s}{1:02d}{3:s}{2:.2f}'.format(deg_str, minute, second, delimiter)
 
 
-def GetZenithDistance(header=None, date=None, ut=None, ra=None, dec=None, lat=None, long=None, debug=False):
+def GetZenithDistance(header=None, date=None, ut=None, ra=None, dec=None, lat=None, lon=None, debug=False):
     """
-    Function to get the zenith distance to an object
-    :param header: the fits header (or a dictionary with the keys 'date-obs', 'ra', and 'dec')
-    :param date: The UT date of the observation (only used if header not given)
-    :param ut: The UTC time of the observation (only used if header not given)
-    :param ra: The right ascension of the observation, in degrees (only used if header not given)
-    :param dec: The declination of the observation, in degrees (only used if header not given)
-    :param lat: The latitude of the observatory, in degrees
-    :param long: The longitude of the observatory, in degrees
-    :return: The zenith distance of the object, in degrees
+    Function to get the zenith distance to an object.
+    the zenith distance is the angular distance from the zenith
+    to that object.
+
+    Parameters:
+    ===========
+    - header:   astropy.io.fits header object, or a dictionary
+                Must have at least the following keys:
+                'date-obs', 'ra', and 'dec'
+
+    - date:     string
+                The UT date of the observation, in isot format.
+                (only used if header not given)
+
+    - ut:       string
+                The UTC time of the observation
+                (only used if header not given)
+
+    - ra:       float
+                The right ascension of the observation, in degrees
+                (only used if header not given)
+
+    - dec:      float
+                The declination of the observation, in degrees
+                (only used if header not given)
+
+    - lat:      float
+                The latitude of the observatory, in degrees
+
+    - lon:      float
+                The longitude of the observatory, in degrees
+
+    Returns:
+    ========
+    The zenith distance of the object, in degrees
     """
 
     if header is None:
-        obstime = Time("{}T{}".format(date, ut), format='isot', scale='utc', location=(long, lat))
+        obstime = Time("{}T{}".format(date, ut), format='isot', scale='utc', location=(lon, lat))
     else:
-        obstime = Time(header['date-obs'], format='isot', scale='utc', location=(long, lat))
+        obstime = Time(header['date-obs'], format='isot', scale='utc', location=(lon, lat))
         delimiter = ":" if ":" in header['ra'] else " "
         ra = 15.0 * convert_hex_string(header['ra'], delimiter=delimiter)
         dec = convert_hex_string(header['dec'], delimiter=delimiter)
@@ -780,6 +1063,231 @@ def GetZenithDistance(header=None, date=None, ut=None, ra=None, dec=None, lat=No
     alt, az = radec2altaz(ra, dec, obstime, debug=debug)
     return 90.0 - alt
 
+
+
+
+def FindOrderNums(orders, wavelengths):
+    """
+      Given a list of kglib.utils.DataStructures.xypoint orders and
+      another list of wavelengths, this
+      finds the order numbers with the
+      requested wavelengths. Note that it finds the first
+      order that contains each wavelength, so you should
+      take care to give wavelengths that are unique to
+      one order.
+    """
+    nums = []
+    for wave in wavelengths:
+        for i, order in enumerate(orders):
+            if order.x[0] < wave and order.x[-1] > wave:
+                nums.append(i)
+                break
+    return nums
+
+
+
+def add_magnitudes(*mag_list):
+    """
+    Combine magnitudes in the right way.
+    Any number of magnitudes can be passed, so long as they are
+    all in the same filter/band!.
+    """
+    flux_list = np.array([10 ** (-m / 2.5) for m in mag_list])
+    total_flux = np.sum(flux_list, axis=0)
+    total_mag = -2.5 * np.log10(total_flux)
+    return total_mag
+
+
+def fwhm(x, y, k=10, ret_roots=False):
+    """
+    Determine full-with-half-maximum of a peaked set of points, x and y.
+
+    Assumes that there is only one peak present in the dataset.  The function
+    uses a spline interpolation with smoothing parameter k ('s' in scipy.interpolate.UnivariateSpline).
+
+    If ret_roots=True, return the x-locations at half maximum instead of just
+    the distance between them.
+    """
+
+
+    class NoPeaksFound(Exception):
+        pass
+
+    half_max = np.max(y) / 2.0
+    s = UnivariateSpline(x, y - half_max, s=k)
+    roots = s.roots()
+
+    if len(roots) > 2:
+        # Multiple peaks. Use the two that straddle the maximum value
+        maxvel = x[np.argmax(y)]
+        left_idx = np.argmin(maxvel - roots)
+        right_idx = np.argmin(roots - maxvel)
+        roots = np.array((roots[left_idx], roots[right_idx]))
+    elif len(roots) < 2:
+        raise NoPeaksFound("No proper peaks were found in the data set; likely "
+                           "the dataset is flat (e.g. all zeros).")
+    if ret_roots:
+        return roots[0], roots[1]
+
+    return abs(roots[1] - roots[0])
+
+
+def integral(x, y, I, k=10):
+    """
+    Integrate y = f(x) for x = 0 to a such that the integral = I
+    I can be an array.
+
+    Returns the values a that are found.
+    """
+    I = np.atleast_1d(I)
+
+    f = UnivariateSpline(x, y, s=k)
+
+    # Integrate as a function of x
+    F = f.antiderivative()
+    Y = F(x)
+
+    a = []
+    for intval in I:
+        F2 = UnivariateSpline(x, Y/Y[-1] - intval, s=0)
+        a.append(F2.roots())
+
+    return np.hstack(a)
+
+
+def is_close(num1, num2, inf_true=True, both_inf=False):
+    """
+    Wrapper around np.isclose that handles Nans/infinities how I want them
+
+    Parameters:
+    ===========
+    - num1, num2:   floats
+                    The numeric values to compare
+
+    - inf_true:     boolean
+                    Return True if one or both of the numbers are infinite or NaN?
+
+    - both_inf:     boolean
+                    Only return True if both numbers are infinite.
+    :return: boolean
+    """
+    # Treat strings a bit differently.
+    from six import string_types
+
+    if isinstance(num1, string_types) or isinstance(num2, string_types):
+        return num1 == num2
+
+    if np.isfinite(num1) and np.isfinite(num2):
+        return np.isclose(num1, num2)
+
+    elif not inf_true or (inf_true and both_inf and (np.isfinite(num1) or np.isfinite(num2))):
+        return False
+
+    return True
+
+
+class ExtrapolatingUnivariateSpline(spline):
+    """
+    Does the same thing as InterpolatedUnivariateSpline, but keeps track of if it is
+    extrapolating. When extrapolating, this will just return the fill value which
+    defaults to NaN.
+    """
+    def __init__(self, x, y, w=None, bbox=[None]*2, k=3, ext=0, fill_value=np.nan):
+        """
+        See docstring for InterpolatedUnivariateSpline.
+        """
+        self.bounds = (min(x), max(x))
+        self.fill_value = fill_value
+        super(ExtrapolatingUnivariateSpline, self).__init__(x, y, w=w, bbox=bbox, k=k, ext=ext)
+
+    def __call__(self, x, nu=0, ext=None):
+        """
+        See docstring for InterpolatedUnivariateSpline.__call__
+        """
+        x = np.atleast_1d(x)
+        retval = super(ExtrapolatingUnivariateSpline, self).__call__(x, nu=nu, ext=ext)
+        idx = ~((x > self.bounds[0]) & (x < self.bounds[1]))
+        retval[idx] = self.fill_value
+        return retval
+
+
+class ErrorPropagationSpline(object):
+    """
+    Does a spline fit, but returns both the spline value and associated uncertainty.
+    This accomplishes the task by generating lots of splines, and return the mean
+    and standard deviation of the spline values at the requested coordinates.
+    It is therefore roughly N times slower than a normal spline!
+    """
+
+    def __init__(self, x, y, yerr, N=1000, *args, **kwargs):
+        """
+        See docstring for InterpolatedUnivariateSpline
+        The parameter `N` gives the number of splines to generate for error propagation.
+        """
+        xx = np.vstack([x for i in range(N)]).T
+        yy = np.vstack([y + np.random.normal(loc=0, scale=yerr) for i in range(N)]).T
+        self._splines = [spline(x, yy[:, i], *args, **kwargs) for i in range(N)]
+
+    def __call__(self, x, *args, **kwargs):
+        """
+        Get the spline value and uncertainty at point(s) x. args and kwargs are passed to spline.__call__
+        """
+        x = np.atleast_1d(x)
+        s = np.vstack([curve(x, *args, **kwargs) for curve in self._splines])
+        return (np.mean(s, axis=0), np.std(s, axis=0))
+
+
+def CombineXYpoints(xypts, snr=None, xspacing=None, numpoints=None, interp_order=3):
+    warnings.warn('This function has moved to kglib.utils.DataStructures!', DeprecationWarning)
+    from kglib.utils.DataStructures import CombineXYpoints
+
+    return CombineXYpoints(xypts=xypts, snr=snr, xspacing=xspacing,
+                           numpoints=numpoints, interp_order=interp_order)
+
+
+def weighted_mean_and_stddev(arr, weights=None, bad_value=np.nan):
+    """
+    Returns the weighted mean and standard deviation of an array.
+
+    Parameters:
+    ===========
+    - arr:          Any list-like object (list, tuple, numpy array...)
+                    The array of values.
+
+    - weights:      A list-like object with the same shape as arr
+                    The weights to apply to the values.
+
+    - bad_value:    float
+                    Return this value if the input array has zero length.
+
+    Returns:
+    ========
+    The weighted mean and standard deviation of the array.
+    """
+
+    arr = np.atleast_1d(arr).astype(np.float)
+    weights = np.atleast_1d(weights).astype(np.float)
+
+    if len(arr) == 0:
+        logging.warn('Zero-length array given! Mean and standard deviation are undefined')
+        return bad_value, bad_value
+    if weights is None:
+        weights = np.ones_like(arr)
+
+    avg = np.average(arr, weights=weights)
+    if len(arr) > 1:
+        var = np.average((arr - avg) ** 2, weights=weights)
+        V1 = np.sum(weights)
+        V2 = np.sum(weights ** 2)
+
+        return avg, np.sqrt(var / (1 - V2 / V1 ** 2)) + np.nansum(1.0 / np.sqrt(weights))
+    return avg, 1.0 / np.sqrt(weights[0])
+
+
+# ############################################################
+#  The following functions are really only useful for
+#  my project.
+#############################################################
 
 def get_max_velocity(p_spt, s_temp):
     MS = SpectralTypeRelations.MainSequence()
@@ -793,7 +1301,6 @@ def get_max_velocity(p_spt, s_temp):
     Rsun = constants.R_sun.cgs.value
     v2 = 2.0 * G * Msun * (M1 + M2) / (Rsun * R1 * (T1 / s_temp) ** 2)
     return np.sqrt(v2) * u.cm.to(u.km)
-
 
 
 @u.quantity_input(v=u.km / u.s, d=u.parsec)
@@ -832,7 +1339,8 @@ def read_observed_targets(target_filename=OBS_TARGET_FNAME):
     :param target_filename: The filename to read. Has a very specific format!
     :return:
     """
-    sample_names = ['identifier', 'RA/DEC (J2000)', 'plx', 'Vmag', 'Kmag', 'vsini', 'SpT', 'configuration', 'Instrument',
+    sample_names = ['identifier', 'RA/DEC (J2000)', 'plx', 'Vmag', 'Kmag', 'vsini', 'SpT', 'configuration',
+                    'Instrument',
                     'Date',
                     'Temperature', 'Velocity', 'vsini_sec', '[Fe/H]', 'Significance', 'Sens_min', 'Sens_any',
                     'Comments',
@@ -855,177 +1363,3 @@ def read_observed_targets(target_filename=OBS_TARGET_FNAME):
     return sample
 
 
-
-
-def FindOrderNums(orders, wavelengths):
-    """
-      Given a list of xypoint orders and
-      another list of wavelengths, this
-      finds the order numbers with the
-      requested wavelengths
-    """
-    nums = []
-    for wave in wavelengths:
-        for i, order in enumerate(orders):
-            if order.x[0] < wave and order.x[-1] > wave:
-                nums.append(i)
-                break
-    return nums
-
-
-
-def add_magnitudes(*mag_list):
-    """
-    Combine magnitudes in the right way
-    :param mag_list: Several magnitudes. Can be numpy arrays or floats
-    :return: the total magnitude
-    """
-    flux_list = np.array([10 ** (-m / 2.5) for m in mag_list])
-    total_flux = np.sum(flux_list, axis=0)
-    total_mag = -2.5 * np.log10(total_flux)
-    return total_mag
-
-
-def fwhm(x, y, k=10, ret_roots=False):
-    """
-    Determine full-with-half-maximum of a peaked set of points, x and y.
-
-    Assumes that there is only one peak present in the dataset.  The function
-    uses a spline interpolation with smoothing parameter k ('s' in scipy.interpolate.UnivariateSpline).
-    """
-
-    class MultiplePeaks(Exception):
-        pass
-
-    class NoPeaksFound(Exception):
-        pass
-
-    half_max = np.max(y) / 2.0
-    s = UnivariateSpline(x, y - half_max, s=k)
-    roots = s.roots()
-
-    if len(roots) > 2:
-        # Multiple peaks. Use the two that straddle the maximum value
-        maxvel = x[np.argmax(y)]
-        left_idx = np.argmin(maxvel - roots)
-        right_idx = np.argmin(roots - maxvel)
-        roots = np.array((roots[left_idx], roots[right_idx]))
-    elif len(roots) < 2:
-        raise NoPeaksFound("No proper peaks were found in the data set; likely "
-                           "the dataset is flat (e.g. all zeros).")
-    if ret_roots:
-        return roots[0], roots[1]
-
-    return abs(roots[1] - roots[0])
-
-
-def integral(x, y, I, k=10):
-    """
-    Integrate y = f(x) for x = 0 to a such that the integral = I
-    I can be an array
-    """
-    I = np.atleast_1d(I)
-
-    f = UnivariateSpline(x, y, s=k)
-
-    # Integrate as a function of x
-    F = f.antiderivative()
-    Y = F(x)
-
-    a = []
-    for intval in I:
-        F2 = UnivariateSpline(x, Y/Y[-1] - intval, s=0)
-        a.append(F2.roots())
-
-    return np.hstack(a)
-
-
-def is_close(num1, num2, inf_true=True, both_inf=False):
-    """
-    Wrapper around np.isclose that handles Nans/infinities how I want them
-    :param num1, num2: The numeric values to compare
-    :param inf_true: Return true if one or both of the numbers are infinite or NaN?
-    :param both_inf: Require that both numbers be infinite, instead of just one
-    :return: boolean
-    """
-    if isinstance(num1, basestring) or isinstance(num2, basestring):
-        return num1 == num2
-
-    if np.isfinite(num1) and np.isfinite(num2):
-        return np.isclose(num1, num2)
-
-    elif not inf_true or (inf_true and both_inf and (np.isfinite(num1) or np.isfinite(num2))):
-        return False
-
-    return True
-
-
-class ExtrapolatingUnivariateSpline(spline):
-    """
-    Does the same thing as InterpolatedUnivariateSpline, but keeps track of if it is
-    extrapolating
-    """
-    def __init__(self, x, y, w=None, bbox=[None]*2, k=3, ext=0, fill_value=np.nan):
-        """
-        See docstring for InterpolatedUnivariateSpline.
-        """
-        self.bounds = (min(x), max(x))
-        self.fill_value = fill_value
-        super(ExtrapolatingUnivariateSpline, self).__init__(x, y, w=w, bbox=bbox, k=k, ext=ext)
-
-    def __call__(self, x, nu=0, ext=None):
-        """
-        See docstring for InterpolatedUnivariateSpline.__call__
-        """
-        x = np.atleast_1d(x)
-        retval = super(ExtrapolatingUnivariateSpline, self).__call__(x, nu=nu, ext=ext)
-        idx = ~((x > self.bounds[0]) & (x < self.bounds[1]))
-        retval[idx] = self.fill_value
-        return retval
-
-
-class ErrorPropagationSpline(object):
-    """
-    Does a spline fit, but returns both the spline value and associated uncertainty.
-    """
-
-    def __init__(self, x, y, yerr, N=1000, *args, **kwargs):
-        """
-        See docstring for InterpolatedUnivariateSpline
-        """
-        xx = np.vstack([x for i in range(N)]).T
-        yy = np.vstack([y + np.random.normal(loc=0, scale=yerr) for i in range(N)]).T
-        self._splines = [spline(x, yy[:, i], *args, **kwargs) for i in range(N)]
-
-    def __call__(self, x, *args, **kwargs):
-        """
-        Get the spline value and uncertainty at point(s) x. args and kwargs are passed to spline.__call__
-        :param x:
-        :return: a tuple with the mean value at x and the standard deviation
-        """
-        x = np.atleast_1d(x)
-        s = np.vstack([curve(x, *args, **kwargs) for curve in self._splines])
-        return (np.mean(s, axis=0), np.std(s, axis=0))
-
-
-def CombineXYpoints(xypts, snr=None, xspacing=None, numpoints=None, interp_order=3):
-    raise NotImplementedError('This function has moved to kglib.utils.DataStructures!')
-
-def weighted_mean_and_stddev(arr, weights=None, bad_value=np.nan):
-    arr = np.atleast_1d(arr).astype(np.float)
-    weights = np.atleast_1d(weights).astype(np.float)
-
-    if len(arr) == 0:
-        logging.warn('Zero-length array given! Mean and standard deviation are undefined')
-        return bad_value, bad_value
-    if weights is None:
-        weights = np.ones_like(arr)
-
-    avg = np.average(arr, weights=weights)
-    if len(arr) > 1:
-        var = np.average((arr - avg) ** 2, weights=weights)
-        V1 = np.sum(weights)
-        V2 = np.sum(weights ** 2)
-
-        return avg, np.sqrt(var / (1 - V2 / V1 ** 2)) + np.nansum(1.0 / np.sqrt(weights))
-    return avg, 1.0 / np.sqrt(weights[0])
