@@ -30,6 +30,7 @@ class stardata:
         self.dec = ""
         self.par = 0.0  # parallax in milli-arcseconds
 
+
 def GetData(starname, safe_spt=False):
     """
     Search simbad for information about the given star.
