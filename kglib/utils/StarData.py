@@ -1,22 +1,17 @@
 from __future__ import print_function
 
-import sys
 import os
 import logging
 
 from astropy.io import fits
 import numpy as np
-
 from astroquery.simbad import Simbad
-import astroquery
 import pandas as pd
+
 from kglib import stellar_data
 from .HelperFunctions import convert_to_hex
 
 
-
-#Simbad.SIMBAD_URL = 'http://simbak.cfa.harvard.edu/simbad/sim-script'
-#Simbad.SIMBAD_URL = 'http://simbad.u-strasbg.f/simbad/sim-script'
 Simbad.TIMEOUT = 60
 try:
     Simbad.add_votable_fields('sp', 'flux(V)', 'flux(K)', 'plx')
@@ -38,8 +33,14 @@ class stardata:
 def GetData(starname, safe_spt=False):
     """
     Search simbad for information about the given star.
-    :param starname: A simbad-queryable name for the star
-    :param safe_spt: If True, convert spectral types with 'm' in them to '5': eg. 'Am' --> 'A5'
+
+    Parameters:
+    ===========
+    - starname:   string
+                  A simbad-queryable name for the star
+
+    - safe_spt:   boolean
+                  If True, convert spectral types with 'm' in them to '5': eg. 'Am' --> 'A5'
     """
     logging.info('Getting stellar data for {}'.format(starname))
     if starname in data_cache:
@@ -103,7 +104,8 @@ VSINI_FILE = "{}/School/Research/Useful_Datafiles/Vsini.csv".format(homedir)
 
 def get_vsini(file_list, vsini_filename=VSINI_FILE):
     """
-    Get the vsini for every fits file in file_list. Uses the OBJECT keyword and a pre-tabulated vsini table
+    Get the vsini for every fits file in file_list. Uses the OBJECT keyword and a pre-tabulated vsini table.
+    This is really only useful for my project...
     :param file_list:
     :return:
     """
