@@ -1,11 +1,12 @@
-import pysynphot
-from astropy import units as u, constants
-from kglib.spectral_type import SpectralTypeRelations, Mamajek_Table
-from scipy.interpolate import InterpolatedUnivariateSpline as spline
+from astropy import units as u
 import logging
-from scipy.optimize import fmin, brute
+
+import pysynphot
+from scipy.interpolate import InterpolatedUnivariateSpline as spline
+from scipy.optimize import brute
 import numpy as np
 
+from kglib.spectral_type import Mamajek_Table
 
 
 class CompanionFitter(object):
@@ -13,22 +14,27 @@ class CompanionFitter(object):
         """
         Initialize a CompanionFitter instance. It will pre-tabulate
         synthetic photometry for main-sequence stars with Temperatures
-        ranging from T_low to T_high, in steps on dT K. All the 
-        models with have [Fe/H] = feh. Finally, we will interpolate
+        ranging from T_low to T_high, in steps of dT K. All the
+        models will have [Fe/H] = feh. Finally, we will interpolate
         the relationship between temperature and magnitude so that
         additional photometry points are made quickly.
 
-        :param filt: A pysynphot bandpass encoding the filter information.
-        :param T_low, T_high, dT: Parameters describing the temperature grid 
-                                  to interpolate  
-        :param feh: The metallicity [Fe/H] to use for the models
+        Parameters:
+        ===========
+        - filt:               A pysynphot bandpass encoding the filter information.
+
+        - T_low, T_high, dT:  floats
+                              Parameters describing the temperature grid
+                              to interpolate
+
+        -feh:                 float
+                              The metallicity [Fe/H] to use for the models
         """
         # Use the Mamajek table to get main-sequence relationships
         MT = Mamajek_Table.MamajekTable()
         MT.mam_df['radius'] = 10**(0.5*MT.mam_df.logL - 2.0*MT.mam_df.logT + 2.0*3.762)
         MT.mam_df['logg'] = 4.44 + np.log10(MT.mam_df.Msun) - 2.0*np.log10(MT.mam_df.radius)
         teff2radius = MT.get_interpolator('Teff', 'radius')
-        teff2mass = MT.get_interpolator('Teff', 'Msun')
         teff2logg = MT.get_interpolator('Teff', 'logg')
 
         # Pre-calculate the magnitude at each temperature
@@ -49,6 +55,20 @@ class CompanionFitter(object):
     def fit(self, T_prim, delta_mag, delta_mag_error, T_range=(3500, 9000)):
         """
         Fit for the companion temperature given a primary temperature and delta-magnitude measurement
+
+        Parameters:
+        ===========
+        - T_prim:           float
+                            The primary star temperature (in Kelvin)
+
+        - delta_mag:        float
+                            The magnitude difference between the primary and companion
+
+        - delta_mag_error:  float
+                            Uncertainty in the magnitude difference
+
+        - T_range:          tuple of size 2
+                            The lower and upper bounds on the companion temperature.
         """
 
         def lnlike(T2, T1, dm, dm_err):
@@ -56,7 +76,6 @@ class CompanionFitter(object):
             logging.debug('T2 = {}: dm = {}'.format(T2, dm_synth))
             return 0.5 * (dm - dm_synth)**2 / dm_err**2
 
-        #T_sec = fmin(lnlike, guess_T, args=(T_prim, delta_mag, delta_mag_error))
         T_sec = brute(lnlike, [T_range], args=(T_prim, delta_mag, delta_mag_error))
         return T_sec
 
