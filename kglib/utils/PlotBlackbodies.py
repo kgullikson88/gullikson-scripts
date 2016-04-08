@@ -1,8 +1,12 @@
-import numpy as np
 from astropy import constants
+
+import numpy as np
 
 
 def Planck(x, T):
+    """
+    Return the Planck function at wavelength x (in cm) and temperature T (in K)
+    """
     h = constants.h.cgs.value
     c = constants.c.cgs.value
     k = constants.k_B.cgs.value
@@ -11,6 +15,9 @@ def Planck(x, T):
 
 
 def Planck_nu(nu, T):
+    """
+    Return the Planck function at frequency nu (in 1/s) and temperature T (in K)
+    """
     h = constants.h.cgs.value
     c = constants.c.cgs.value
     k = constants.k_B.cgs.value
