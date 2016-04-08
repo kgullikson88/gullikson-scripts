@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 from kglib.cross_correlation import Analyze_CCF
-from HelperFunctions import roundodd, mad, integral
+from .HelperFunctions import roundodd, mad, integral
 from kglib.cross_correlation import CCF_Systematics
 from kglib import fitters
 

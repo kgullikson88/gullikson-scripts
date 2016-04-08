@@ -3,7 +3,7 @@ from __future__ import print_function, division, absolute_import
 from george import kernels, GP
 
 import numpy as np
-import fitters
+from kglib import fitters
 from scipy.integrate import quad
 from scipy.optimize import minimize
 

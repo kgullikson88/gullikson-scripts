@@ -11,7 +11,7 @@ from scipy.signal import fftconvolve
 import numpy as np
 from astropy import constants, units
 
-from RotBroad_Fast import Broaden as RotBroad
+from .RotBroad_Fast import Broaden as RotBroad
 
 
 def MacroBroad(data, vmacro, extend=True):

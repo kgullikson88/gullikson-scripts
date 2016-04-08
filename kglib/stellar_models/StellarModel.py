@@ -16,7 +16,7 @@ import numpy as np
 import h5py
 
 from kglib.utils import FittingUtilities, DataStructures
-import Broaden
+from kglib.stellar_models import Broaden
 import pandas
 
 

@@ -9,13 +9,13 @@ from __future__ import print_function, division
 import numpy as np
 
 from kglib.utils import FittingUtilities, DataStructures
-import Correlate
+from kglib.cross_correlation import Correlate
 from kglib.utils import HelperFunctions
 from kglib.stellar_models import StellarModel, Broaden
 
 
 try:
-    import pyraf
+    from pyraf import iraf
     pyraf_import = True
 except ImportError:
     pyraf_import = False
@@ -37,8 +37,8 @@ import multiprocessing
 import functools
 
 if pyraf_import:
-    pyraf.iraf.noao()
-    pyraf.iraf.noao.rv()
+    iraf.noao()
+    iraf.noao.rv()
 
 
 def convert(coord, delim=":"):
@@ -75,7 +75,7 @@ if pyraf_import:
         jd = header['jd']
         t = Time(jd, format='jd', scale='utc')
         dt = t.datetime
-        output = pyraf.iraf.noao.rv.rvcorrect(epoch='INDEF',
+        output = iraf.noao.rv.rvcorrect(epoch='INDEF',
                                               epoch_vsun='INDEF',
                                               observatory=observatory,
                                               year=dt.year,

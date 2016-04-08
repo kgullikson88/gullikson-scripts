@@ -1,3 +1,5 @@
+from __future__ import print_function, division, absolute_import
+
 import numpy as np
 from scipy.ndimage import convolve
 
@@ -30,10 +32,10 @@ try:
         return C
 # Otherwise use the normal scipy fftpack ones instead (~2-3x slower!)
 except ImportError:
-    print \
-        "Module 'anfft' (FFTW Python bindings) could not be imported.\n" \
-        "To install it, try running 'easy_install anfft' from the terminal.\n" \
-        "Falling back on the slower 'fftpack' module for ND Fourier transforms."
+    print(
+        "Module 'anfft' (FFTW Python bindings) could not be imported.\n"
+        "To install it, try running 'easy_install anfft' from the terminal.\n"
+        "Falling back on the slower 'fftpack' module for ND Fourier transforms.")
     from scipy.fftpack import fftn, ifftn
 
 

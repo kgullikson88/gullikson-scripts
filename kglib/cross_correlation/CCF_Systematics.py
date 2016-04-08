@@ -1,3 +1,5 @@
+from __future__ import print_function, division, absolute_import
+
 import os
 import re
 from collections import defaultdict
@@ -293,7 +295,7 @@ def get_detected_objects(df, tol=1.0, debug=False):
 
     if debug:
         for secondary in sorted(secondary_to_rv.keys()):
-            print 'RV for {}: {:.2f} km/s'.format(secondary, secondary_to_rv[secondary])
+            print ('RV for {}: {:.2f} km/s'.format(secondary, secondary_to_rv[secondary]))
 
     keys = df.Secondary.values
     good = df.loc[abs(df.rv.values - np.array(itemgetter(*keys)(secondary_to_rv))) < tol]
@@ -367,17 +369,15 @@ def make_gaussian_process_samples(df):
             e = fit_sigma(df, i)
         error[i] = np.sqrt(e**2 + lit_err[i]**2)
     for Tm, Ta, e in zip(Tmeasured, Tactual, error):
-        print Tm, Ta, e
+        print(Tm, Ta, e)
     plt.figure(1)
     limits = [3000, 7000]
     plt.errorbar(Tmeasured, Tactual, yerr=error, fmt='.k', capsize=0)
     plt.plot(limits, limits, 'r--')
-    #plt.xlim((min(Tmeasured) - 100, max(Tmeasured) + 100))
     plt.xlabel('Measured Temperature')
     plt.ylabel('Actual Temperature')
     plt.xlim(limits)
     plt.ylim(limits)
-    #plt.show(block=False)
 
     # Define some functions to use in the GP fit
     def model(pars, T):
@@ -409,23 +409,23 @@ def make_gaussian_process_samples(df):
     p0 = [np.array(initial) + 1e-8 * np.random.randn(ndim) for i in xrange(nwalkers)]
     sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=(Tactual, Tmeasured, error))
 
-    print 'Running first burn-in'
+    print('Running first burn-in')
     p1, lnp, _ = sampler.run_mcmc(p0, 500)
     sampler.reset()
 
-    print "Running second burn-in..."
+    print("Running second burn-in...")
     p_best = p1[np.argmax(lnp)]
     p2 = [p_best + 1e-8 * np.random.randn(ndim) for i in xrange(nwalkers)]
     p3, _, _ = sampler.run_mcmc(p2, 250)
     sampler.reset()
 
-    print "Running production..."
+    print("Running production...")
     sampler.run_mcmc(p3, 1000)
 
     # We now need to increase the spread of the posterior distribution so that it encompasses the right number of data points
     # This is because the way we have been treating error bars here is kind of funky...
     # First, generate a posterior distribution of Tactual for every possible Tmeasured
-    print 'Generating posterior samples at all temperatures...'
+    print('Generating posterior samples at all temperatures...')
     N = 10000  # This is 1/10th of the total number of samples!
     idx = np.argsort(-sampler.lnprobability.flatten())[:N]  # Get N 'best' curves
     par_vals = sampler.flatchain[idx]
@@ -459,7 +459,7 @@ def make_gaussian_process_samples(df):
 
 
     # Finally, plot a bunch of the fits
-    print "Plotting..."
+    print("Plotting...")
     N = 300
     Tvalues = np.arange(3000, 7000, 20)
     idx = np.argsort(-sampler.lnprobability.flatten())[:N]  # Get N 'best' curves
@@ -512,8 +512,8 @@ def check_posterior(df, posterior, Tvalues=np.arange(3000, 6900, 100)):
                 logging.warn(
                     'Only {}/{} of the samples ({:.2f}%) were accepted for T = {} K'.format(Nacc[-1], Ntot[-1], p * 100,
                                                                                             T))
-                print low, high
-                print sorted(Ta)
+                print(low, high)
+                print(sorted(Ta))
         else:
             Ntot.append(0)
             Nacc.append(0)

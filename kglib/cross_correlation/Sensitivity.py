@@ -16,11 +16,11 @@ import h5py
 import seaborn as sns
 
 from kglib.utils import FittingUtilities, StarData, HelperFunctions, DataStructures
-import GenericSearch
+from kglib.cross_correlation import GenericSearch
 from kglib.stellar_models import StellarModel, Broaden
 from kglib.spectral_type import SpectralTypeRelations, Mamajek_Table
 from kglib.utils.PlotBlackbodies import Planck
-import Correlate
+from kglib.cross_correlation import Correlate
 
 
 sns.set_context('paper', font_scale=1.5)

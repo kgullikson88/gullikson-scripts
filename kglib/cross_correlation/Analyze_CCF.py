@@ -2,6 +2,8 @@
 This is a module to read in an HDF5 file with CCFs.
 Use this to determine the best parameters, and plot the best CCF for each star/date
 """
+from __future__ import print_function, division, absolute_import
+
 from collections import defaultdict
 import logging
 

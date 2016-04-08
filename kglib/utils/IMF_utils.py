@@ -3,6 +3,7 @@ Various codes to work with the initial mass function. Stolen shamelessly from
 Adam Ginsburg's agpy code:
 https://code.google.com/p/agpy/source/browse/trunk/agpy/imf.py
 """
+from __future__ import print_function, division, absolute_import
 import types # I use typechecking.  Is there a better way to do this?  (see inverse_imf below)
 
 import numpy as np
@@ -122,7 +123,7 @@ def chabrier(m, integral=False):
 
     integral is NOT IMPLEMENTED
     """
-    if integral: print "Chabrier integral NOT IMPLEMENTED"
+    if integral: print("Chabrier integral NOT IMPLEMENTED")
     # This system MF can be parameterized by the same type of lognormal form as
     # the single MF (eq. [17]), with the same normalization at 1 Msun, with the
     # coefficients (Chabrier 2003)
@@ -239,7 +240,10 @@ def m_cumint(fn=kroupa, bins=np.logspace(-2,2,500)):
     return integral.cumsum() / integral.sum()
 
 massfunctions = {'kroupa':kroupa, 'salpeter':salpeter, 'chabrier':chabrier, 'schechter':schechter,'modified_schechter':modified_schechter}
-reverse_mf_dict = {v:k for k,v in massfunctions.iteritems()}
+if hasattr(massfunctions, '__iteritems__'):
+    reverse_mf_dict = {v:k for k,v in massfunctions.iteritems()}
+else:
+    reverse_mf_dict = {v:k for k,v in massfunctions.items()}
 # salpeter and schechter selections are arbitrary
 mostcommonmass = {'kroupa':0.08, 'salpeter':0.01, 'chabrier':0.23, 'schecter':0.01,'modified_schechter':0.01}
 

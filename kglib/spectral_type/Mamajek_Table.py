@@ -1,9 +1,11 @@
+from __future__ import print_function, division, absolute_import
+
 import os
 
 from scipy.interpolate import InterpolatedUnivariateSpline as spline
 import pandas as pd
 
-import SpectralTypeRelations
+from kglib.spectral_type import SpectralTypeRelations
 
 _ROOT = os.path.abspath(os.path.dirname(__file__))
 def get_data(path):
@@ -54,7 +56,7 @@ class MamajekTable(object):
         """
         if print_keys:
             for k in self.mam_df.keys():
-                print k
+                print(k)
         return list(self.mam_df.keys())
 
     def get_interpolator(self, xcolumn, ycolumn, extrap='nearest'):

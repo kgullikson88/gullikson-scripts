@@ -1,3 +1,5 @@
+from __future__ import print_function, division, absolute_import
+
 import sys
 import warnings
 import logging
@@ -10,7 +12,7 @@ import numpy as np
 from kglib.utils import FittingUtilities, DataStructures
 from kglib.stellar_models.Broaden import RotBroad
 from kglib.utils.PlotBlackbodies import Planck
-import Normalized_Xcorr
+from kglib.cross_correlation import Normalized_Xcorr
 
 
 minvel = -1000  # Minimum velocity to output, in km/s
