@@ -5,6 +5,17 @@ sns.set_style('ticks')
 sns.set_context('notebook', font_scale=1.5)
 
 def add_spt_axis(axis, spt_values=('M5', 'M0', 'K5', 'K0', 'G5', 'G0')):
+    """
+    Add a top axis to a figure to give spectra types. Assumes the bottom axis
+    gives the temperature.
+
+    Parameters:
+    ===========
+    - axis:         matplotlib axis object
+                    The current axis to add to.
+
+    - spt_values:   The spectral type axis labels to use.
+    """
     from kglib.spectral_type import SpectralTypeRelations
     MS = SpectralTypeRelations.MainSequence()
     # Find the temperatures at each spectral type
@@ -25,6 +36,39 @@ def add_spt_axis(axis, spt_values=('M5', 'M0', 'K5', 'K0', 'G5', 'G0')):
 
 
 def bokeh_errorbar(fig, x, y, xerr=None, yerr=None, source=None, color='blue', point_kwargs=None, error_kwargs=None):
+    """
+    Make an errorbar for bokeh. I tried to roughly follow their convention, but it is not perfect...
+
+    Parameters:
+    ===========
+    - fig:            bokeh figure
+                      The figure to plot on
+
+    - x:              numpy.ndarray or string
+                      The x-values, or the column within source
+
+    - y:              numpy.ndarray or string
+                      The y-values, or the column within source
+
+    - xerr:           numpy.ndarray or string
+                      The uncertainty in the x-values, or the column within source
+
+    - yerr:           numpy.ndarray or string
+                      The uncertainty in the y-values, or the column within source
+
+    - source:         ColumnDataSource object
+                      The data source.
+
+    - color:          string
+                      The point color
+
+    - point_kwargs:   dictionary
+                      keyword arguments to pass to `fig.circle`
+
+    - error_kwargs:   dictionary
+                      keyword arguments to pass to `fig.multiline`
+                      for displaying the error bars.
+    """
     if point_kwargs is None:
         point_kwargs = {}
     if error_kwargs is None:
