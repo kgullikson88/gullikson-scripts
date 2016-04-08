@@ -1,6 +1,6 @@
 recursive-include kglib/spectral_type/data *
 recursive-include kglib/stellar_data/data *
-include kglib/stellar_models/RotBroad2.c
+include kglib/stellar_models/RotBroad_Fast.c
 include kglib/utils/FittingUtilities.c
 include README*
 include LICENSE
