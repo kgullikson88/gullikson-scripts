@@ -113,7 +113,7 @@ class Bayesian_LS(object):
         Log of the posterior probability of pars given the data.
         """
         lp = self.lnprior(pars)
-        return lp + self._lnlike(pars) if np.isfinite(lp) else -np.inf
+        return lp + self.lnlike(pars) if np.isfinite(lp) else -np.inf
 
 
     def mnest_prior(self, cube, ndim, nparams):
