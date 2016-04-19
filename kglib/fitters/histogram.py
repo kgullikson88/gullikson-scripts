@@ -61,9 +61,11 @@ class HistFitter(fitters.Bayesian_LS):
 
 
     def lnprior(self, pars):
-        """ Override this if you want to set a prior on the bin heights. """
+        """ Override this if you want to set a better prior on the bin heights. """
 
-        return 0.0
+        if all([p > 0 and p < 10 for p in pars]):
+            return 0
+        return -np.inf
 
 
     def lnprob(self, pars):
